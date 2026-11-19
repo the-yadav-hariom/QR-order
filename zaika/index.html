@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zaika. Live Restaurant System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F0F0F;--card:#1A1A1A;--card2:#212121;--line:#2A2A2A;--tx:#F2EEE8;--mut:#8D8780;--or:#F25C2A;--or2:#ff7a47;--gr:#22C55E;--am:#F5A524;--rd:#EF4444;--bl:#5B7CFF;--cream:#FAF8F5;--ink:#1A1A1A;--ink2:#6B655E;--gline:#EAE4DC}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font:14px/1.45 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+button:disabled{cursor:not-allowed;opacity:.45}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+/* top bar */
+#bar{flex:none;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;padding:8px 14px;background:#0A0A0A;border-bottom:1px solid var(--line);z-index:30}
+.brand{font-weight:800;font-size:17px;letter-spacing:-.02em}.brand i{font-style:normal;color:var(--or)}
+.brand small{font-weight:500;color:var(--mut);font-size:11px;margin-left:6px}
+.seg{max-width:100%;overflow-x:auto;display:flex;gap:4px;background:#161616;padding:3px;border-radius:12px;border:1px solid var(--line)}
+.seg button{padding:7px 12px;border-radius:9px;font-weight:600;font-size:12.5px;color:var(--mut);white-space:nowrap}
+.seg button.on{background:var(--or);color:#fff}
+.seg button:not(.on):hover{color:var(--tx)}
+.tools{display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+.tools a{color:var(--mut);text-decoration:none;border:1px solid var(--line);padding:5px 9px;border-radius:8px}
+.tools a:hover{color:var(--tx);border-color:#444}
+.tools .seg button{padding:4px 8px;font-size:11.5px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--gr);display:inline-block;box-shadow:0 0 0 0 rgba(34,197,94,.6);animation:pl 2s infinite}
+.sbtn{border:1px solid var(--line);padding:5px 9px;border-radius:8px;color:var(--mut)}.sbtn:hover{color:var(--tx);border-color:#444}
+@keyframes pl{70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+#app{flex:1;min-height:0;display:flex}
+.pane{flex:1;min-width:0;min-height:0;position:relative;container-type:inline-size;display:flex;flex-direction:column;overflow:hidden}
+.split{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;background:#000;width:100%}
+.split>.pane{min-width:0}
+.plabel{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:5;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:2px 10px;border-radius:0 0 8px 8px;background:#000;color:#aaa;font-weight:700}
+@media (max-width:1100px){.split{grid-template-columns:1fr;overflow:auto;grid-auto-rows:min(92vh,900px)}}
+/* toasts */
+#toasts{position:fixed;top:56px;right:12px;z-index:100;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:min(360px,92vw)}
+.toast{pointer-events:auto;background:#111;color:#fff;border:1px solid #333;border-left:4px solid var(--or);padding:10px 12px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.45);animation:tin .25s ease-out;font-size:13px}
+.toast b{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
+.toast.g{border-left-color:var(--gr)}.toast.a{border-left-color:var(--am)}.toast.r{border-left-color:var(--rd)}
+@keyframes tin{from{transform:translateX(30px);opacity:0}}
+/* ===== GUEST (light) ===== */
+.guest{background:var(--cream);color:var(--ink)}
+.g-head{flex:none;display:flex;align-items:center;gap:10px;padding:12px 18px;background:#fff;border-bottom:1px solid var(--gline)}
+.g-head h1{font-size:22px;font-weight:800;letter-spacing:-.03em}.g-head h1 i{font-style:normal;color:var(--or)}
+.g-head small{color:var(--ink2);font-weight:500}
+.tbadge{margin-left:auto;background:var(--ink);color:#fff;font-weight:700;font-size:12px;padding:6px 12px;border-radius:999px}
+.g-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 370px}
+.g-main,.g-side{overflow:auto;padding:16px 18px}
+.g-side{background:#fff;border-left:1px solid var(--gline);display:flex;flex-direction:column;gap:16px}
+@container (max-width:880px){.g-body{display:block;overflow:auto}.g-main,.g-side{overflow:visible}.g-side{border-left:0;border-top:1px solid var(--gline)}}
+.gtabs{display:flex;gap:6px;margin-bottom:14px;overflow:auto;position:sticky;top:-16px;background:var(--cream);padding:6px 0;z-index:3}
+.gtabs button{padding:9px 16px;border-radius:999px;background:#fff;border:1px solid var(--gline);font-weight:600;color:var(--ink2);white-space:nowrap}
+.gtabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.gtabs .pip{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--or);color:#fff;font-size:11px;line-height:18px;text-align:center;margin-left:6px}
+.cats{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.cats button{padding:6px 13px;border-radius:999px;background:transparent;border:1px solid var(--gline);color:var(--ink2);font-weight:600;font-size:12.5px}
+.cats button.on{background:var(--or);color:#fff;border-color:var(--or)}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.mi{background:#fff;border:1px solid var(--gline);border-radius:18px;padding:12px;display:flex;gap:12px}
+.mi-img{flex:none;width:68px;height:68px;border-radius:16px;display:grid;place-items:center;font-size:32px}
+.mi-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.mi-t{display:flex;justify-content:space-between;gap:8px}.mi-t b{font-weight:700}.mi-t span{font-weight:700;color:var(--or)}
+.mi p{font-size:12px;color:var(--ink2)}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{font-size:10.5px;padding:2px 8px;border-radius:999px;background:#FFF1EB;color:#C2410C;font-weight:600}
+.chip.n{background:#F1EEE9;color:var(--ink2)}
+.mi-f{display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px}
+.mi-f small{color:var(--ink2);font-size:11.5px}
+.add{background:var(--or);color:#fff;font-weight:700;padding:7px 14px;border-radius:999px;font-size:12.5px}
+.add:hover{background:#e04d1d}
+.card{background:#fff;border:1px solid var(--gline);border-radius:18px;padding:16px}
+.card h3{font-size:15px;margin-bottom:10px;font-weight:700}
+.sub{color:var(--ink2);font-size:12.5px}
+.sec{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:700;margin-bottom:8px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.cl{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--gline)}
+.cl .n{flex:1;min-width:0}.cl .n b{font-weight:600;display:block}.cl .n small{color:var(--ink2)}
+.qty{display:flex;align-items:center;gap:6px}.qty button{width:26px;height:26px;border-radius:50%;background:#F1EEE9;font-weight:800}.qty span{min-width:16px;text-align:center;font-weight:700}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0}
+.row.tot{font-weight:800;font-size:17px;border-top:1px solid var(--gline);margin-top:6px;padding-top:10px}
+.btn{display:block;width:100%;background:var(--or);color:#fff;font-weight:800;padding:13px;border-radius:14px;font-size:15px;text-align:center}
+.btn:hover:not(:disabled){background:#e04d1d}
+.btn.g{background:var(--gr)}.btn.d{background:var(--ink)}.btn.ghost{background:#F1EEE9;color:var(--ink)}
+.upsell{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFF1EB,#FFE3D6);border:1px dashed var(--or);padding:10px;border-radius:14px;margin-top:10px}
+.upsell b{display:block}.upsell small{color:#9a3c14}.upsell button{margin-left:auto;background:var(--or);color:#fff;padding:6px 12px;border-radius:999px;font-weight:700;font-size:12px}
+.steps{display:flex;align-items:flex-start;margin:6px 0 14px}
+.stp{flex:1;text-align:center;font-size:11.5px;color:var(--ink2);font-weight:600;position:relative}
+.stp i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;margin:0 auto 4px;background:#EEE9E2;font-style:normal;font-weight:800;position:relative;z-index:1}
+.stp::before{content:"";position:absolute;top:13px;left:-50%;right:50%;height:3px;background:#EEE9E2}
+.stp:first-child::before{display:none}
+.stp.done i{background:var(--gr);color:#fff}.stp.done::before{background:var(--gr)}
+.stp.now i{background:var(--or);color:#fff;animation:glow 1.6s infinite}.stp.now::before{background:var(--or)}
+.stp.done,.stp.now{color:var(--ink)}
+@keyframes glow{0%{box-shadow:0 0 0 0 rgba(242,92,42,.5)}100%{box-shadow:0 0 0 10px rgba(242,92,42,0)}}
+.ring{position:relative;width:132px;height:132px;margin:4px auto 6px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.rg-bg{fill:none;stroke:#EEE9E2;stroke-width:9}.rg-fg{fill:none;stroke:var(--or);stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.rg-fg.ok{stroke:var(--gr)}
+.rg-t{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.rg-t b{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}.rg-t small{color:var(--ink2);font-size:11px}
+.banner{border-radius:14px;padding:11px 13px;font-weight:700;margin-top:8px}
+.banner.ok{background:#E8F9EE;color:#15803D;border:1px solid #BBF7D0}
+.banner.wait{background:#FFF7E6;color:#B45309;border:1px solid #FDE7B2}
+.banner.cook{background:#FFF1EB;color:#C2410C;border:1px solid #FFD2BD}
+.sticker{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.06em}
+.wifi{display:flex;align-items:center;gap:12px}
+.wifi .ic{width:44px;height:44px;border-radius:12px;background:#FFF1EB;display:grid;place-items:center;font-size:22px}
+.wifi code{display:block;font-family:"JetBrains Mono",monospace;font-weight:700;font-size:15px}
+.copy{margin-left:auto;background:var(--ink);color:#fff;padding:8px 14px;border-radius:10px;font-weight:700;font-size:12.5px}.copy.done{background:var(--gr)}
+.bar{height:10px;border-radius:99px;background:#EEE9E2;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--or),#ffa066);border-radius:99px;transition:width .5s}
+.quiz .opts{display:grid;gap:8px;margin-top:10px}
+.quiz .opts button{padding:10px 12px;text-align:left;border:1.5px solid var(--gline);border-radius:12px;font-weight:600;background:#fff}
+.quiz .opts button:hover:not(:disabled){border-color:var(--or)}
+.quiz .opts .ok{background:#E8F9EE;border-color:var(--gr)}.quiz .opts .no{background:#FEECEC;border-color:var(--rd)}
+.pl{display:flex;gap:10px;margin-bottom:10px}
+.pl div{flex:1;padding:8px 10px;border-radius:12px;border:1.5px solid var(--gline);display:flex;align-items:center;gap:8px;font-weight:700}
+.pl div.turn{border-color:var(--or);background:#FFF6F1}
+.av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:800;background:var(--or)}.av.r{background:var(--bl)}
+.pl em{margin-left:auto;font-style:normal;font-size:18px}
+.callwrap{display:grid;place-items:center;padding:20px 0}
+.callbtn{width:190px;height:190px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff8a5c,var(--or));color:#fff;font-weight:800;font-size:19px;display:grid;place-content:center;gap:4px;box-shadow:0 0 0 0 rgba(242,92,42,.5);animation:pulse 2s infinite}
+.callbtn span{font-size:42px}
+.callbtn:disabled{animation:none;opacity:.6}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(242,92,42,.45)}100%{box-shadow:0 0 0 34px rgba(242,92,42,0)}}
+.qchips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.qchips button{padding:9px 16px;border-radius:999px;background:#fff;border:1.5px solid var(--gline);font-weight:700}.qchips button:hover:not(:disabled){border-color:var(--or);color:var(--or)}
+.wtimer{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:22px;text-align:center;margin:12px 0 2px;color:var(--or)}
+.pm{display:grid;gap:8px}
+.pm button{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;border:1.5px solid var(--gline);background:#fff;font-weight:600;text-align:left}
+.pm button.on{border-color:var(--or);background:#FFF6F1}
+.pm button .rd{margin-left:auto;width:18px;height:18px;border-radius:50%;border:2px solid #cfc8bf}
+.pm button.on .rd{border-color:var(--or);background:radial-gradient(var(--or) 45%,transparent 50%)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button{padding:7px 14px;border-radius:999px;border:1.5px solid var(--gline);background:#fff;font-weight:700;font-size:13px}.pills button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tg{width:44px;height:26px;border-radius:99px;background:#d7d0c7;position:relative;transition:.2s}.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.tg.on{background:var(--or)}.tg.on::after{left:21px}
+.receipt{background:#fff;padding:20px 20px 4px;position:relative;filter:drop-shadow(0 8px 18px rgba(0,0,0,.12));animation:rin .6s cubic-bezier(.2,.9,.3,1.2);max-width:360px;margin:0 auto}
+.zig{height:9px;margin:0 -20px;background:conic-gradient(from -45deg at bottom,#0000,#fff 1deg 90deg,#0000 91deg) 50%/12px 100%;position:relative;top:9px;background-color:transparent}
+.receipt h2{text-align:center;font-weight:800;font-size:24px}.receipt h2 i{font-style:normal;color:var(--or)}
+.receipt .mono{font-size:12px}
+.rc-l{display:flex;justify-content:space-between;font-family:"JetBrains Mono",monospace;font-size:12px;padding:2px 0;gap:8px}
+.hr{border-top:1.5px dashed #d8d1c8;margin:10px 0}
+.stamp{position:absolute;right:16px;top:58px;border:3px solid var(--gr);color:var(--gr);font-weight:800;font-size:22px;padding:2px 10px;border-radius:8px;transform:rotate(-12deg);animation:stamp .5s .5s both;letter-spacing:.06em}
+@keyframes stamp{from{transform:rotate(-12deg) scale(2.4);opacity:0}to{transform:rotate(-12deg) scale(1);opacity:1}}
+@keyframes rin{from{transform:translateY(-30px) scaleY(.7);opacity:0}}
+.stars{display:flex;gap:6px;justify-content:center;font-size:34px;margin:8px 0}
+.stars button{filter:grayscale(1);opacity:.4;transition:.15s}.stars button.on{filter:none;opacity:1}.stars button:hover{transform:scale(1.15)}
+.modal{position:absolute;inset:0;background:rgba(20,15,10,.45);z-index:20;display:grid;place-items:end center}
+@container (min-width:600px){.modal{place-items:center}}
+.sheet{background:#fff;width:min(440px,100%);border-radius:24px 24px 0 0;padding:20px;display:flex;flex-direction:column;gap:14px;max-height:92%;overflow:auto;color:var(--ink)}
+@container (min-width:600px){.sheet{border-radius:24px}}
+.sheet h3{font-size:18px}
+.empty{text-align:center;color:var(--ink2);padding:22px 8px}.empty span{font-size:34px;display:block}
+/* ===== DARK (staff / kds) ===== */
+.dark{background:var(--bg);color:var(--tx)}
+.d-top{flex:none;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.d-top h2{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-right:auto}.d-top h2 i{font-style:normal;color:var(--or)}
+.kpis{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px;min-width:104px}
+.kpi small{display:block;color:var(--mut);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.kpi b{font-size:21px;font-weight:800;font-variant-numeric:tabular-nums}.kpi b.or{color:var(--or2)}
+.kpi.bump{animation:bump .8s}
+@keyframes bump{30%{border-color:var(--gr);transform:scale(1.05)}}
+.dtabs{display:flex;gap:6px;padding:10px 16px 0}
+.dtabs button{padding:8px 16px;border-radius:10px 10px 0 0;background:transparent;color:var(--mut);font-weight:700;border-bottom:2px solid transparent}
+.dtabs button.on{color:var(--tx);border-bottom-color:var(--or)}
+.nbadge{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:var(--or);color:#fff;font-size:11px;text-align:center;margin-left:6px;animation:pulse 1.6s infinite}
+.d-body{flex:1;min-height:0;overflow:auto;padding:14px 16px}
+.alert{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg,rgba(239,68,68,.22),rgba(242,92,42,.16));border:1px solid var(--rd);border-radius:12px;padding:10px 14px;margin:10px 16px 0;animation:flash 1.4s infinite}
+.alert b{font-size:14px}.alert .tm{margin-left:auto}
+.alert button{background:var(--or);color:#fff;font-weight:700;padding:7px 12px;border-radius:9px}
+@keyframes flash{50%{background:linear-gradient(90deg,rgba(239,68,68,.4),rgba(242,92,42,.3))}}
+.two{display:grid;grid-template-columns:minmax(260px,380px) minmax(0,1fr);gap:14px;align-items:start}
+@container (max-width:760px){.two{grid-template-columns:1fr}}
+.qh{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);font-weight:700;margin:2px 0 8px;display:flex;align-items:center;gap:8px}
+.qc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;cursor:pointer;display:grid;gap:4px}
+.qc:hover{border-color:#444}.qc.sel{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
+.qc .l1{display:flex;align-items:center;gap:8px}.qc .l1 b{font-size:15px}
+.qc small{color:var(--mut)}
+.tag{font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 7px;border-radius:6px;background:#2a2a2a;color:#ccc}
+.tag.new{background:var(--or);color:#fff;animation:pulse 1.8s infinite}.tag.cook{background:rgba(245,165,36,.18);color:var(--am)}.tag.rdy{background:rgba(34,197,94,.2);color:var(--gr)}.tag.srv{background:rgba(91,124,255,.2);color:#9bb0ff}
+.tag.TANDOOR{background:rgba(239,68,68,.18);color:#ff8f8f}.tag.CURRY{background:rgba(245,165,36,.18);color:var(--am)}.tag.DRINKS{background:rgba(91,124,255,.2);color:#9bb0ff}
+.det{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
+.det h3{font-size:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dl{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:center}
+.dl .q{font-weight:800;color:var(--or2);min-width:28px}.dl .n{flex:1}.dl .n small{display:block;color:var(--mut)}
+.dbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--or);color:#fff;font-weight:800;padding:12px 18px;border-radius:12px;font-size:15px}
+.dbtn:hover:not(:disabled){background:#e04d1d}.dbtn.g{background:var(--gr);color:#04210f}.dbtn.o{background:#2a2a2a;color:var(--tx)}.dbtn.sm{padding:7px 12px;font-size:12.5px;border-radius:9px}
+.tm{font-family:"JetBrains Mono",monospace;font-weight:700;font-variant-numeric:tabular-nums}
+.t-g{color:var(--gr)}.t-a{color:var(--am)}.t-r{color:var(--rd)}
+.big{font-size:26px}
+.ready-alert{background:rgba(34,197,94,.14);border:1px solid var(--gr);color:#7ff0a8;border-radius:12px;padding:10px 12px;font-weight:800;margin:10px 0;animation:flashg 1.6s infinite}
+@keyframes flashg{50%{background:rgba(34,197,94,.28)}}
+.floor{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.tbl{background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:8px;position:relative;min-height:170px}
+.tbl h4{font-size:24px;font-weight:800;display:flex;justify-content:space-between;align-items:center}
+.tbl.s-ORDERING{border-color:var(--or)}.tbl.s-COOKING{border-color:var(--am)}.tbl.s-EATING{border-color:var(--gr)}.tbl.s-PAID{border-color:var(--bl)}
+.tbl.help{border-color:var(--rd);animation:flash2 1.1s infinite}
+@keyframes flash2{50%{box-shadow:0 0 0 6px rgba(239,68,68,.35);background:#271613}}
+.st{font-size:10.5px;font-weight:800;letter-spacing:.1em;padding:3px 9px;border-radius:999px;width:max-content}
+.st.IDLE{background:#2a2a2a;color:var(--mut)}.st.ORDERING{background:rgba(242,92,42,.2);color:var(--or2)}.st.COOKING{background:rgba(245,165,36,.18);color:var(--am)}.st.EATING{background:rgba(34,197,94,.2);color:var(--gr)}.st.PAID{background:rgba(91,124,255,.22);color:#9bb0ff}
+.helpb{position:absolute;top:-9px;right:12px;background:var(--rd);color:#fff;font-weight:800;font-size:11px;padding:3px 10px;border-radius:999px;animation:pulse 1.2s infinite}
+.tbl .acts{margin-top:auto;display:flex;gap:6px;flex-wrap:wrap}
+/* KDS */
+.kds{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:12px 16px}
+@container (max-width:760px){.kds{grid-template-columns:1fr;overflow:auto}}
+.col{background:#141414;border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;min-height:0}
+.col-h{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);font-weight:800;letter-spacing:.1em}
+.col-h .c{font-size:20px}
+.col-b{padding:10px;overflow:auto;display:flex;flex-direction:column;gap:10px;flex:1;min-height:90px}
+.tk{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px;animation:tin .3s}
+.tk.rdy{border-color:var(--gr);background:#0f2016}
+.tk-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.tb{background:var(--tx);color:#111;font-weight:800;font-size:22px;padding:2px 12px;border-radius:10px}
+.tk-h .tm{margin-left:auto;font-size:22px}
+.tk ul{list-style:none;display:grid;gap:4px;margin-bottom:10px}
+.tk li{font-size:15px;font-weight:600;display:flex;gap:8px}.tk li b{color:var(--or2);min-width:28px}.tk li small{color:var(--mut);font-weight:500}
+.tk .dbtn{width:100%;padding:10px}
+.clock{font-size:20px;color:var(--tx)}
+.none{color:#555;text-align:center;padding:26px 6px;font-size:13px}
+
+#bar{justify-content:space-between;flex-wrap:nowrap;padding:8px 14px}
+.brand{background:none;font-size:20px;cursor:pointer;padding:2px 4px}
+.nav{display:flex;gap:8px}
+.nav button{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:#161616;color:var(--mut);font-weight:700;font-size:13px}
+.nav button:hover{color:var(--tx);border-color:#444}.nav button.on{background:var(--or);border-color:var(--or);color:#fff}
+.nav button.lk::after{content:"🔒";font-size:11px}
+.dtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--mut)}
+.dtools .seg button{padding:4px 8px;font-size:11.5px}
+.pinov{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);z-index:200;display:grid;place-items:center;padding:16px}
+.pinbox{background:#161616;border:1px solid var(--line);border-radius:24px;padding:26px 24px;width:min(330px,100%);text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.pinic{font-size:34px}.pinbox h3{font-size:19px;margin:6px 0 2px}.pinbox p{color:var(--mut);font-size:13px}
+.dots{display:flex;gap:14px;justify-content:center;margin:18px 0 6px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid #555}.dots i.f{background:var(--or);border-color:var(--or)}
+.dots.shake{animation:shk .4s}
+@keyframes shk{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.perr{height:18px;color:var(--rd);font-size:12.5px;font-weight:700}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:10px 0 14px}
+.kp button{height:56px;border-radius:16px;background:#222;font-size:22px;font-weight:700}.kp button:hover{background:#2c2c2c}.kp button:active{background:var(--or)}
+.pinbox>button{color:var(--mut);font-weight:600;padding:6px 14px}
+
+.mfloor{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.mcard{display:flex;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px}.mcard.off{opacity:.6}
+.mthumb{flex:none;width:78px;height:78px;border-radius:14px;display:grid;place-items:center;font-size:34px;overflow:hidden}
+.mthumb img,.fprev img,.mi-img img{width:100%;height:100%;object-fit:cover;display:block}
+.mbody{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}.mbody>b{font-size:15px}
+.mrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.mp{font-weight:800;color:var(--or2)}
+.mi-img{overflow:hidden}
+.dmodal{position:absolute;inset:0;z-index:30;background:rgba(0,0,0,.7);display:grid;place-items:start center;padding:14px;overflow:auto}
+.dform{background:#161616;border:1px solid var(--line);border-radius:20px;padding:20px;width:min(580px,100%);color:var(--tx)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fgrid .full,.fgrid .fimg{grid-column:1/-1}
+@container (max-width:520px){.fgrid{grid-template-columns:1fr}}
+.dform label{display:grid;gap:5px;font-size:12px;color:var(--mut);font-weight:600}
+.dform input:not([type=checkbox]):not([type=file]),.dform select,.dform textarea{font:inherit;background:#0f0f0f;color:var(--tx);border:1px solid #333;border-radius:10px;padding:9px 11px;width:100%;outline:none}
+.dform input:focus,.dform select:focus,.dform textarea:focus{border-color:var(--or)}
+.fimg{display:flex;gap:14px;align-items:center}
+.fprev{flex:none;width:96px;height:96px;border-radius:16px;display:grid;place-items:center;font-size:44px;overflow:hidden}
+.achips{display:flex;gap:8px;flex-wrap:wrap}
+.dform .ac{display:inline-flex;grid-template-columns:none;gap:0;cursor:pointer}.ac input{position:absolute;opacity:0;pointer-events:none}
+.ac span{padding:6px 12px;border-radius:999px;border:1px solid #333;color:var(--mut);font-weight:600;font-size:12.5px}.ac input:checked+span{background:rgba(242,92,42,.2);border-color:var(--or);color:var(--or2)}
+label.dbtn{cursor:pointer;color:var(--tx)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="app"></div>
+<div id="toasts"></div>
+<div id="pin"></div>
+<script>
+"use strict";
+/* ============ DATA ============ */
+const STATIONS=["TANDOOR","CURRY","DRINKS"];
+const DEFAULT_MENU=[
+ {id:"paneer",name:"Paneer Makhani",price:320,station:"CURRY",prep:14,cat:"Mains",emoji:"🍛",bg:"#FFE9D6",desc:"Cottage cheese in a buttery tomato-cashew gravy",al:["Dairy","Nuts"],size:true,spice:true},
+ {id:"dal",name:"Dal Makhani",price:280,station:"CURRY",prep:12,cat:"Mains",emoji:"🥘",bg:"#F6E3C8",desc:"Slow-cooked black lentils finished with cream",al:["Dairy"],size:true,spice:true},
+ {id:"biryani",name:"Veg Biryani",price:300,station:"CURRY",prep:18,cat:"Mains",emoji:"🍚",bg:"#FFF0C2",desc:"Fragrant dum-cooked basmati with garden vegetables",al:["Dairy"],size:true,spice:true},
+ {id:"naan",name:"Garlic Naan",price:70,station:"TANDOOR",prep:6,cat:"Breads",emoji:"🫓",bg:"#F8E8C9",desc:"Tandoor-baked bread brushed with garlic butter",al:["Gluten","Dairy"]},
+ {id:"tikka",name:"Tandoori Paneer Tikka",price:260,station:"TANDOOR",prep:12,cat:"Starters",emoji:"🍢",bg:"#FFD9C7",desc:"Char-grilled marinated paneer, peppers and onion",al:["Dairy"],size:true,spice:true},
+ {id:"lassi",name:"Mango Lassi",price:120,station:"DRINKS",prep:3,cat:"Drinks",emoji:"🥭",bg:"#FFEFB8",desc:"Chilled yogurt shake with Alphonso mango",al:["Dairy"]},
+ {id:"chai",name:"Masala Chai",price:60,station:"DRINKS",prep:4,cat:"Drinks",emoji:"🍵",bg:"#EFE0CF",desc:"Hot milk tea with ginger and cardamom",al:["Dairy"]},
+ {id:"jamun",name:"Gulab Jamun",price:80,station:"CURRY",prep:3,cat:"Desserts",emoji:"🍮",bg:"#F6DCD0",desc:"Warm milk dumplings in rose-cardamom syrup",al:["Dairy","Gluten"]}
+];
+const menuList=()=>(S&&S.menu)||DEFAULT_MENU;
+const M=id=>menuList().find(x=>x.id===id)||DEFAULT_MENU.find(x=>x.id===id)||{id,name:"Dish",price:0,prep:10,station:"CURRY",al:[],emoji:"🍽️",bg:"#F3E9DF"};
+const isAvail=x=>x.avail!==false;
+const imgHTML=(x,cls="mi-img")=>`<div class="${cls}" style="background:${x.bg||"#F3E9DF"}">${x.img?`<img src="${x.img}" alt="">`:esc(x.emoji||"🍽️")}</div>`;
+const halfPrice=x=>Math.round(x.price*0.6/10)*10;
+const unit=(x,size)=>size==="Half"?halfPrice(x):x.price;
+const QUIZ=[
+ {q:"Which spice gives Indian curries their golden-yellow colour?",o:["Turmeric","Cumin","Fennel"],a:0},
+ {q:"Which is the world's most expensive spice by weight?",o:["Cardamom","Saffron","Vanilla beans"],a:1},
+ {q:"'Hing' is the Hindi name for which ingredient?",o:["Asafoetida","Star anise","Fenugreek"],a:0},
+ {q:"Cardamom is the 'Queen of Spices'. Which is the 'King'?",o:["Cloves","Black pepper","Cinnamon"],a:1},
+ {q:"Which of these is NOT in a classic chai masala?",o:["Ginger","Cinnamon","Turmeric"],a:2}
+];
+/* ============ UTIL ============ */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const mmss=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")};
+const lineTotal=l=>l.price*l.qty;
+const sumItems=a=>a.reduce((t,l)=>t+lineTotal(l),0);
+const lineLbl=l=>`${l.qty}× ${esc(l.name)}${l.size?" · "+l.size:""}${l.spice?" · "+l.spice:""}`;
+const tnum=k=>Number(k.slice(1));
+/* ============ STORE (localStorage + BroadcastChannel) ============ */
+const KEY="zaika_state_v1";
+let S=null,bc=null,memOnly=false;
+try{bc=new BroadcastChannel("zaika_live_sync")}catch(e){}
+function seed(){
+ const n=Date.now(),m=60000;
+ const L=(id,qty,size,spice)=>{const x=M(id);return{id,name:x.name,qty,size:x.size?(size||"Full"):null,spice:x.spice?(spice||"Medium"):null,price:unit(x,size||"Full"),station:x.station}};
+ const tables={};for(let i=1;i<=6;i++)tables["T"+i]={help:null,resolved:null,paid:false,receipt:null};
+ const o1={id:212,table:"T1",items:[L("biryani",1),L("naan",2)],status:"COOKING",createdAt:n-5*m,cookStart:n-4*m,tickets:{CURRY:{status:"COOKING",start:n-4*m},TANDOOR:{status:"COOKING",start:n-4*m}}};
+ const o2={id:213,table:"T2",items:[L("dal",1,"Full","Mild"),L("chai",2)],status:"PENDING_APPROVAL",createdAt:n-40000,tickets:{}};
+ const o3={id:214,table:"T3",items:[L("tikka",1,"Full","Hot"),L("lassi",2)],status:"COOKING",createdAt:n-8*m,cookStart:n-7*m,tickets:{TANDOOR:{status:"COOKING",start:n-7*m},DRINKS:{status:"READY",start:n-7*m,readyAt:n-5.5*m}}};
+ [o1,o2,o3].forEach(o=>o.total=sumItems(o.items));
+ return{rev:1,speed:1,nextId:215,menu:JSON.parse(JSON.stringify(DEFAULT_MENU)),loyalty:140,stats:{orders:42,sales:46900},tables,orders:[o1,o2,o3]};
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.orders&&s.tables)return s}}catch(e){memOnly=true}return null}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){memOnly=true}}
+S=load()||seed();if(!S.menu)S.menu=JSON.parse(JSON.stringify(DEFAULT_MENU));persist();
+function commit(fn,evt){
+ fn(S);S.rev=(S.rev||0)+1;persist();
+ try{bc&&bc.postMessage({s:S,evt:evt||null})}catch(e){}
+ render();if(evt)notify(evt);
+}
+if(bc)bc.onmessage=e=>{const d=e.data;if(d&&d.s&&d.s.rev>S.rev){S=d.s;render();if(d.evt)notify(d.evt)}};
+window.addEventListener("storage",e=>{if(e.key===KEY&&e.newValue&&!bc){try{const s=JSON.parse(e.newValue);if(s.rev>S.rev){S=s;render()}}catch(_){}}});
+/* derived */
+const tOrders=k=>S.orders.filter(o=>o.table===k&&!o.cleared);
+const tUnpaid=k=>tOrders(k).filter(o=>o.status!=="PAID");
+function tState(k){
+ const t=S.tables[k];if(t.paid)return"PAID";
+ const a=tUnpaid(k);
+ if(a.some(o=>o.status==="PENDING_APPROVAL"))return"ORDERING";
+ if(a.some(o=>o.status==="COOKING"))return"COOKING";
+ if(a.some(o=>o.status==="READY"||o.status==="SERVED"))return"EATING";
+ return"IDLE";
+}
+const el=start=>Math.max(0,(Date.now()-start)/1000*(S.speed||1));
+const prepSec=o=>Math.max(...o.items.map(l=>M(l.id).prep))*60;
+/* ============ LOCAL UI STATE ============ */
+let view="guest";
+const G={table:5,tab:"menu",cat:"All",cart:[],cfg:null,tip:0,split:false,method:null,copied:null,quiz:{i:0,s:[0,0],turn:0,pick:null,done:false}};
+const ST={tab:"orders",sel:null};
+let soundOn=true,actx=null;
+const PINS={staff:"1234",kitchen:"5678"};
+const AUTH={staff:false,kitchen:false};
+try{const a=JSON.parse(sessionStorage.getItem("zaika_auth")||"{}");AUTH.staff=!!a.staff;AUTH.kitchen=!!a.kitchen}catch(e){}
+const saveAuth=()=>{try{sessionStorage.setItem("zaika_auth",JSON.stringify(AUTH))}catch(e){}};
+const need=v=>v==="staff"?["staff"]:v==="kitchen"?["kitchen"]:v==="split"?["staff","kitchen"]:[];
+let PIN=null;
+function setHash(v){try{location.hash=v==="guest"?"guest-"+G.table:v}catch(e){}}
+function route(v){
+ const miss=need(v).filter(r=>!AUTH[r]);
+ if(miss.length){PIN={role:miss[0],buf:"",err:"",target:v};if(need(view).some(r=>!AUTH[r]))view="guest"}
+ else{PIN=null;view=v}
+}
+function pinHTML(){
+ if(!PIN)return"";
+ return `<div class="pinov"><div class="pinbox"><div class="pinic">${PIN.role==="staff"?"🧑‍💼":"👨‍🍳"}</div><h3>${PIN.role==="staff"?"Staff Dashboard":"Kitchen Display"}</h3><p>Enter your 4-digit PIN</p>
+ <div class="dots ${PIN.err?"shake":""}">${[0,1,2,3].map(i=>`<i class="${i<PIN.buf.length?"f":""}"></i>`).join("")}</div><div class="perr">${PIN.err||""}</div>
+ <div class="kp">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-act="pk" data-v="${n}">${n}</button>`).join("")}<span></span><button data-act="pk" data-v="0">0</button><button data-act="pback" aria-label="Delete">⌫</button></div>
+ <button data-act="pcancel">Cancel</button></div></div>`;
+}
+function parseHash(){
+ const h=(location.hash||"").slice(1);let m;
+ if((m=h.match(/^guest-?([1-6])?$/))){if(m[1])G.table=+m[1];route("guest")}
+ else if(["staff","kitchen","split"].includes(h))route(h);
+ else route("guest");
+}
+/* ============ SOUND + TOAST ============ */
+function beep(kind){
+ if(!soundOn)return;
+ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const seqs={new_order:[[880,0],[1175,.14]],help:[[1320,0],[1320,.12],[1320,.24]],ready:[[660,0],[880,.12],[1320,.24]],sent:[[520,0],[780,.12]],paid:[[784,0],[1047,.12],[1568,.24]],station:[[700,0]],resolved:[[600,0],[900,.12]],review:[[900,0]]};
+  (seqs[kind]||[[700,0]]).forEach(([f,t])=>{
+   const o=actx.createOscillator(),g=actx.createGain();o.type="sine";o.frequency.value=f;
+   const s=actx.currentTime+t;g.gain.setValueAtTime(0.0001,s);g.gain.exponentialRampToValueAtTime(.18,s+.02);g.gain.exponentialRampToValueAtTime(.0001,s+.22);
+   o.connect(g);g.connect(actx.destination);o.start(s);o.stop(s+.25);
+  });
+ }catch(e){}
+}
+function visRoles(){return view==="split"?["guest","staff","kitchen"]:[view]}
+function notify(e){
+ const roles=(e.aud||[]).filter(r=>visRoles().includes(r)&&(r!=="guest"||!e.table||e.table==="T"+G.table));
+ if(!roles.length)return;
+ beep(e.t);
+ const box=document.getElementById("toasts");
+ roles.forEach(r=>{
+  const msg=typeof e.msg==="string"?e.msg:(e.msg[r]||e.msg.all);if(!msg)return;
+  const d=document.createElement("div");d.className="toast "+(e.c||"");
+  d.innerHTML=`<b>${r==="kitchen"?"Kitchen":r==="staff"?"Staff":"Guest · Table "+G.table}</b>${esc(msg)}`;
+  box.appendChild(d);setTimeout(()=>d.remove(),5200);
+ });
+}
+/* ============ ACTIONS ============ */
+const ACT={};
+function ui(fn){fn();render()}
+ACT.go=d=>{route(d.v);if(!PIN)setHash(d.v);render()};
+ACT.pk=d=>{
+ if(!PIN||PIN.buf.length>=4)return;PIN.buf+=d.v;PIN.err="";
+ if(PIN.buf.length===4){
+  if(PIN.buf===PINS[PIN.role]){const t=PIN.target;AUTH[PIN.role]=true;saveAuth();route(t);if(!PIN)setHash(t)}
+  else{PIN.buf="";PIN.err="Wrong PIN, try again"}
+ }
+ render();
+};
+ACT.pback=()=>{if(PIN){PIN.buf=PIN.buf.slice(0,-1);PIN.err="";render()}};
+ACT.pcancel=()=>{PIN=null;render()};
+ACT.lock=d=>{AUTH[d.r]=false;saveAuth();if(need(view).some(r=>!AUTH[r])){view="guest";setHash("guest")}render()};
+document.addEventListener("keydown",e=>{
+ if(!PIN)return;
+ if(/^[0-9]$/.test(e.key))ACT.pk({v:e.key});else if(e.key==="Backspace")ACT.pback();else if(e.key==="Escape")ACT.pcancel();
+});
+ACT.speed=d=>commit(s=>{s.speed=+d.v});
+ACT.sound=()=>ui(()=>{soundOn=!soundOn});
+ACT.reset=()=>{G.cart=[];G.cfg=null;G.tip=0;G.split=false;G.method=null;G.tab="menu";G.quiz={i:0,s:[0,0],turn:0,pick:null,done:false};ST.sel=null;commit(s=>{const r=s.rev,sp=s.speed,mn=s.menu;Object.keys(s).forEach(k=>delete s[k]);Object.assign(s,seed());s.rev=r;s.speed=sp;s.menu=mn},{t:"sent",aud:["guest","staff","kitchen"],msg:{all:"Demo reset to the starting state"}})};
+/* guest */
+ACT.gtab=d=>ui(()=>{G.tab=d.v});
+ACT.cat=d=>ui(()=>{G.cat=d.v});
+ACT.add=d=>{const x=M(d.id);if(!isAvail(x))return;if(x.size||x.spice){G.cfg={id:x.id,size:"Full",spice:"Medium",qty:1};render()}else{addLine(x,{qty:1});render()}};
+function addLine(x,o){
+ const size=x.size?(o.size||"Full"):null,spice=x.spice?(o.spice||"Medium"):null,deal=!!o.deal;
+ const price=deal?99:unit(x,size||"Full");
+ const key=[x.id,size,spice,deal].join("|");
+ const f=G.cart.find(l=>l.key===key);
+ if(f)f.qty+=o.qty;else G.cart.push({key,id:x.id,name:x.name,qty:o.qty,size,spice,price,station:x.station,deal});
+}
+ACT.cfg=d=>ui(()=>{G.cfg[d.k]=d.k==="qty"?Math.max(1,G.cfg.qty+ +d.v):d.v});
+ACT.cfgadd=()=>ui(()=>{addLine(M(G.cfg.id),G.cfg);G.cfg=null});
+ACT.cfgx=()=>ui(()=>{G.cfg=null});
+ACT.qty=d=>ui(()=>{const l=G.cart.find(a=>a.key===d.k);if(!l)return;l.qty+=+d.v;if(l.qty<=0)G.cart=G.cart.filter(a=>a!==l)});
+ACT.upsell=()=>ui(()=>addLine(M("lassi"),{qty:1,deal:true}));
+ACT.place=()=>{
+ const k="T"+G.table;if(!G.cart.length||S.tables[k].paid)return;
+ const id=S.nextId,items=G.cart.map(({key,...l})=>l),total=sumItems(items);G.cart=[];
+ commit(s=>{s.orders.push({id,table:k,items,status:"PENDING_APPROVAL",createdAt:Date.now(),tickets:{},total});s.nextId++;s.loyalty+=Math.floor(total/10)},
+  {t:"new_order",aud:["staff"],table:k,c:"",msg:{staff:`New order #${id} from Table ${G.table} · ${inr(total)}`}});
+};
+ACT.copy=()=>{
+ const done=r=>{G.copied=r;render();setTimeout(()=>{G.copied=null;render()},2500)};
+ try{navigator.clipboard.writeText("zaika2026").then(()=>done("ok"),()=>done("fail"))}catch(e){done("fail")}
+};
+ACT.qpick=d=>{const q=G.quiz;if(q.pick!==null||q.done)return;ui(()=>{q.pick=+d.v;if(+d.v===QUIZ[q.i].a)q.s[q.turn]++});
+ setTimeout(()=>{ui(()=>{if(q.i>=QUIZ.length-1){q.done=true}else{q.i++;q.turn=1-q.turn;q.pick=null}})},1100)};
+ACT.qreset=()=>ui(()=>{G.quiz={i:0,s:[0,0],turn:0,pick:null,done:false}});
+ACT.call=d=>{
+ const k="T"+G.table;
+ commit(s=>{s.tables[k].help={type:d.v,ts:Date.now()};s.tables[k].resolved=null},
+  {t:"help",aud:["staff"],table:k,c:"r",msg:{staff:`Table ${G.table} requested: ${d.v}`}});
+};
+ACT.tip=d=>ui(()=>{G.tip=+d.v});
+ACT.splitt=()=>ui(()=>{G.split=!G.split});
+ACT.method=d=>ui(()=>{G.method=d.v});
+const billOf=k=>{const o=tUnpaid(k);const sub=sumItems(o.flatMap(x=>x.items));const tip=Math.round(sub*G.tip/100);return{o,sub,tip,total:sub+tip}};
+ACT.pay=()=>{
+ const k="T"+G.table,b=billOf(k);if(!b.o.length||!G.method||b.o.some(o=>o.status!=="READY"&&o.status!=="SERVED"))return;
+ const items=[];b.o.flatMap(o=>o.items).forEach(l=>{const f=items.find(i=>i.id===l.id&&i.size===l.size&&i.spice===l.spice&&i.price===l.price);f?f.qty+=l.qty:items.push({...l})});
+ const rc={no:"R-"+b.o[b.o.length-1].id,orders:b.o.map(o=>o.id),items,sub:b.sub,tip:b.tip,tipPct:G.tip,total:b.total,method:G.method,split:G.split,ts:Date.now(),rating:0};
+ const ids=b.o.map(o=>o.id);G.method=null;G.tip=0;G.split=false;
+ commit(s=>{s.orders.forEach(o=>{if(ids.includes(o.id))o.status="PAID"});s.stats.orders+=ids.length;s.stats.sales+=rc.total;s.tables[k].paid=true;s.tables[k].receipt=rc},
+  {t:"paid",aud:["staff","kitchen"],table:k,c:"g",msg:{staff:`Table ${G.table} paid ${inr(rc.total)} via ${rc.method}`,kitchen:`Table ${G.table} paid · order closed`}});
+};
+ACT.rate=d=>commit(s=>{s.tables["T"+G.table].receipt.rating=+d.v},{t:"review",aud:["staff"],table:"T"+G.table,msg:{staff:`Table ${G.table} left a ${d.v}★ review`}});
+/* staff */
+ACT.stab=d=>ui(()=>{ST.tab=d.v});
+ACT.sel=d=>ui(()=>{ST.sel=+d.id});
+ACT.send=d=>{
+ const id=+d.id,o=S.orders.find(a=>a.id===id);if(!o||o.status!=="PENDING_APPROVAL")return;
+ commit(s=>{const x=s.orders.find(a=>a.id===id);x.status="COOKING";x.cookStart=Date.now();x.tickets={};x.items.forEach(l=>{if(!x.tickets[l.station])x.tickets[l.station]={status:"COOKING",start:x.cookStart}})},
+  {t:"sent",aud:["kitchen","guest"],table:o.table,msg:{kitchen:`New ticket · Table ${tnum(o.table)} · order #${id}`,guest:"Order confirmed! Your food is cooking 🔥"}});
+};
+ACT.station=d=>{
+ const id=+d.id,o=S.orders.find(a=>a.id===id);if(!o||o.status!=="COOKING")return;
+ const all=Object.entries(o.tickets).every(([st,t])=>st===d.st||t.status==="READY");
+ commit(s=>{const x=s.orders.find(a=>a.id===id);const t=x.tickets[d.st];t.status="READY";t.readyAt=Date.now();if(Object.values(x.tickets).every(t=>t.status==="READY"))x.status="READY"},
+  all?{t:"ready",aud:["guest","staff"],table:o.table,c:"g",msg:{guest:"Your food is on the way! 🍽️",staff:`Table ${tnum(o.table)} order #${id} is READY TO SERVE`}}
+     :{t:"station",aud:["staff"],table:o.table,c:"a",msg:{staff:`Table ${tnum(o.table)} · ${d.st} station ready`}});
+};
+ACT.serve=d=>{
+ const id=+d.id,o=S.orders.find(a=>a.id===id);if(!o||(o.status!=="COOKING"&&o.status!=="READY"))return;
+ const was=o.status;
+ commit(s=>{const x=s.orders.find(a=>a.id===id);Object.values(x.tickets).forEach(t=>{if(t.status!=="READY"){t.status="READY";t.readyAt=Date.now()}});x.status="SERVED"},
+  {t:was==="COOKING"?"ready":"station",aud:["guest","kitchen"],table:o.table,c:"g",msg:{guest:was==="COOKING"?"Your food is on the way! 🍽️":"Enjoy your meal! 🍽️",kitchen:`Order #${id} served · Table ${tnum(o.table)}`}});
+};
+ACT.resolve=d=>{
+ const k=d.t;
+ commit(s=>{const t=s.tables[k];if(t.help){t.resolved={type:t.help.type,at:Date.now()};t.help=null}},
+  {t:"resolved",aud:["guest"],table:k,c:"g",msg:{guest:"Waiter is on the way ✓"}});
+};
+ACT.clear=d=>commit(s=>{s.orders.forEach(o=>{if(o.table===d.t)o.cleared=true});const t=s.tables[d.t];t.paid=false;t.help=null;t.resolved=null;t.receipt=null},{t:"sent",aud:["staff"],table:d.t,msg:{staff:`Table ${tnum(d.t)} cleared and ready for the next guests`}});
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-act]");if(!b||b.disabled)return;
+ const f=ACT[b.dataset.act];if(f)f(b.dataset,b);
+},true);
+/* ============ RENDER: BAR ============ */
+function base(){return location.href.split("#")[0]}
+function renderBar(){
+ const b=(v,ic,l)=>`<button class="${view===v?"on":""} ${need(v).every(r=>AUTH[r])?"":"lk"}" data-act="go" data-v="${v}">${ic} ${l}</button>`;
+ return `<div class="brand" data-act="go" data-v="guest">Zaika<i>.</i></div><div class="nav">${b("staff","🧑‍💼","Staff")}${b("kitchen","👨‍🍳","Kitchen")}</div>`;
+}
+/* ============ RENDER: GUEST ============ */
+function allergenChips(x){return (x.al||[]).map(a=>`<span class="chip">${esc(a)}</span>`).join("")}
+function guestMenu(){
+ const cats=["All",...new Set(menuList().map(x=>x.cat).filter(Boolean))];
+ if(!cats.includes(G.cat))G.cat="All";
+ const list=menuList().filter(x=>G.cat==="All"||x.cat===G.cat);
+ return `<div class="cats">${cats.map(c=>`<button class="${G.cat===c?"on":""}" data-act="cat" data-v="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+ <div class="mgrid">${list.map(x=>`<div class="mi" style="${isAvail(x)?"":"opacity:.55"}">${imgHTML(x)}<div class="mi-b">
+  <div class="mi-t"><b>${esc(x.name)}</b><span>${inr(x.price)}</span></div><p>${esc(x.desc||"")}</p>
+  <div class="chips">${(x.al||[]).map(a=>`<span class="chip">${esc(a)}</span>`).join("")}</div>
+  <div class="mi-f"><small>🕒 ~${x.prep} min</small>${isAvail(x)?`<button class="add" data-act="add" data-id="${x.id}">${x.size||x.spice?"Customize +":"Add +"}</button>`:`<span class="chip n">Sold out</span>`}</div></div></div>`).join("")||`<div class="empty"><span>🍽️</span>No dishes here yet</div>`}</div>`;
+}
+function guestWait(){
+ const pts=S.loyalty,goal=200,pct=Math.min(100,pts/goal*100),q=G.quiz,cur=QUIZ[q.i];
+ const quiz=q.done?`<div class="empty"><span>🏆</span><b>${q.s[0]===q.s[1]?"It's a tie!":(q.s[0]>q.s[1]?"Aman":"Riya")+(q.s[0]===q.s[1]?"":" wins!")}</b><p class="sub">Aman ${q.s[0]} – ${q.s[1]} Riya</p><button class="btn ghost" style="margin-top:10px" data-act="qreset">Play again</button></div>`
+ :`<div class="pl"><div class="${q.turn===0?"turn":""}"><span class="av">A</span>Aman<em>${q.s[0]}</em></div><div class="${q.turn===1?"turn":""}"><span class="av r">R</span>Riya<em>${q.s[1]}</em></div></div>
+ <div class="sub">Question ${q.i+1} of ${QUIZ.length} · ${q.turn===0?"Aman's":"Riya's"} turn</div><b style="display:block;margin-top:4px">${cur.q}</b>
+ <div class="opts">${cur.o.map((o,i)=>`<button ${q.pick!==null?"disabled":""} class="${q.pick!==null?(i===cur.a?"ok":i===q.pick?"no":""):""}" data-act="qpick" data-v="${i}">${o}</button>`).join("")}</div>`;
+ return `<div class="stack">
+ <div class="card"><h3>📶 One-tap Wi-Fi</h3><div class="wifi"><div class="ic">📶</div><div><span class="sub">Network</span><code>Zaika_Guest</code><span class="sub">Password</span><code>zaika2026</code></div><button class="copy ${G.copied==="ok"?"done":""}" data-act="copy">${G.copied==="ok"?"Copied ✓":"Copy"}</button></div>${G.copied==="fail"?`<p class="sub" style="margin-top:8px">Your browser blocked copying, so please type the password shown above.</p>`:""}</div>
+ <div class="card"><h3>🎁 Loyalty rewards</h3><div class="row"><span class="sub">Earn 1 point per ₹10 spent</span><b>${pts} / ${goal} pts</b></div><div class="bar"><i style="width:${pct}%"></i></div><p class="sub">${pts>=goal?"🎉 Free Mango Lassi unlocked!":`${goal-pts} points to a <b>free Mango Lassi</b>`}</p></div>
+ <div class="card quiz"><h3>🌶️ Spice Quiz <span class="sub" style="font-weight:500">· Aman vs Riya</span></h3>${quiz}</div></div>`;
+}
+function guestWaiter(){
+ const t=S.tables["T"+G.table],h=t.help,r=t.resolved;
+ return `<div class="card"><div class="callwrap"><button class="callbtn" data-act="call" data-v="Waiter" ${h?"disabled":""}><span>🔔</span>Call waiter</button></div>
+ <div class="qchips">${["Water","Napkins","Bill"].map(x=>`<button data-act="call" data-v="${x}" ${h?"disabled":""}>${x==="Water"?"💧":x==="Napkins"?"🧻":"🧾"} ${x}</button>`).join("")}</div>
+ ${h?`<div class="wtimer" data-el="real" data-start="${h.ts}" data-pre="WAITER · ">WAITER · 00:00</div><p class="sub" style="text-align:center">Request: <b>${esc(h.type)}</b> · staff have been alerted</p>`
+ :r?`<div class="banner ok" style="text-align:center;margin-top:16px">Waiter is on the way ✓<div class="sub" style="color:#15803D;font-weight:500">${esc(r.type)} request resolved</div></div>`
+ :`<p class="sub" style="text-align:center;margin-top:16px">Need something? One tap alerts your waiter.</p>`}</div>`;
+}
+function receiptHTML(rc){
+ return `<div class="receipt"><div class="stamp">PAID ✓</div><h2>Zaika<i>.</i></h2><p class="sub" style="text-align:center">Indore • Dine-In</p><div class="hr"></div>
+ <div class="rc-l"><span>Table ${G.table}</span><span>${rc.orders.map(i=>"#"+i).join(" ")}</span></div><div class="rc-l"><span>${new Date(rc.ts).toLocaleString([], {dateStyle:"medium",timeStyle:"short"})}</span><span>${rc.no}</span></div><div class="hr"></div>
+ ${rc.items.map(l=>`<div class="rc-l"><span>${l.qty}× ${esc(l.name)}${l.size?" ("+l.size+")":""}</span><span>${inr(lineTotal(l))}</span></div>`).join("")}
+ <div class="hr"></div><div class="rc-l"><span>Subtotal</span><span>${inr(rc.sub)}</span></div>${rc.tip?`<div class="rc-l"><span>Tip (${rc.tipPct}%)</span><span>${inr(rc.tip)}</span></div>`:""}
+ <div class="rc-l" style="font-weight:700;font-size:15px"><span>TOTAL</span><span>${inr(rc.total)}</span></div>
+ ${rc.split?`<div class="rc-l"><span>Aman</span><span>${inr(Math.ceil(rc.total/2))}</span></div><div class="rc-l"><span>Riya</span><span>${inr(Math.floor(rc.total/2))}</span></div>`:""}
+ <div class="rc-l"><span>Paid via</span><span>${esc(rc.method)}</span></div><div class="hr"></div><p class="sub" style="text-align:center;padding-bottom:12px">✉️ Receipt emailed to you · Thank you!</p><div class="zig"></div></div>`;
+}
+function guestBill(){
+ const k="T"+G.table,t=S.tables[k];
+ if(t.paid&&t.receipt){
+  const rc=t.receipt;
+  return `<div class="stack">${receiptHTML(rc)}<div class="card" style="margin-top:14px"><h3 style="text-align:center">How was your meal?</h3><div class="stars">${[1,2,3,4,5].map(n=>`<button class="${rc.rating>=n?"on":""}" data-act="rate" data-v="${n}">⭐</button>`).join("")}</div>${rc.rating?`<p class="sub" style="text-align:center">Thanks for your ${rc.rating}★ review! 🙏 Staff will clear the table shortly.</p>`:`<p class="sub" style="text-align:center">Tap a star to rate</p>`}</div></div>`;
+ }
+ const b=billOf(k);
+ if(!b.o.length)return `<div class="card empty"><span>🧾</span>No open orders yet.<br>Order something from the menu first.</div>`;
+ const notReady=b.o.some(o=>o.status!=="READY"&&o.status!=="SERVED");
+ const M5=[["Cash","💵"],["Bank transfer","🏦"],["Card","💳"],["Apple Pay",""],["Google Pay","🅖"]];
+ return `<div class="stack"><div class="card"><h3>Your bill · Table ${G.table}</h3>
+  ${b.o.flatMap(o=>o.items).map(l=>`<div class="row"><span>${lineLbl(l)}</span><span>${inr(lineTotal(l))}</span></div>`).join("")}
+  <div class="row" style="border-top:1px solid var(--gline);margin-top:6px;padding-top:8px"><span>Subtotal</span><b>${inr(b.sub)}</b></div>
+  ${b.tip?`<div class="row"><span>Tip (${G.tip}%)</span><span>${inr(b.tip)}</span></div>`:""}
+  <div class="row tot"><span>Total</span><span>${inr(b.total)}</span></div>
+  ${G.split?`<div class="pl" style="margin:10px 0 0"><div><span class="av">A</span>Aman<em style="font-size:15px">${inr(Math.ceil(b.total/2))}</em></div><div><span class="av r">R</span>Riya<em style="font-size:15px">${inr(Math.floor(b.total/2))}</em></div></div>`:""}</div>
+  <div class="card"><div class="switch"><div><b>Split bill</b><div class="sub">Aman &amp; Riya, 50/50</div></div><button class="tg ${G.split?"on":""}" data-act="splitt" aria-label="Split bill"></button></div></div>
+  <div class="card"><div class="sec">Add a tip</div><div class="pills">${[0,5,10,15].map(p=>`<button class="${G.tip===p?"on":""}" data-act="tip" data-v="${p}">${p?p+"%":"No tip"}</button>`).join("")}</div></div>
+  <div class="card"><div class="sec">Payment method</div><div class="pm">${M5.map(([m,i])=>`<button class="${G.method===m?"on":""}" data-act="method" data-v="${m}"><span>${i||"🍎"}</span>${m}<i class="rd"></i></button>`).join("")}</div></div>
+  <button class="btn g" data-act="pay" ${notReady||!G.method?"disabled":""}>Confirm payment · ${inr(b.total)}</button>
+  ${notReady?`<p class="sub" style="text-align:center">You can pay once your food is ready or served.</p>`:!G.method?`<p class="sub" style="text-align:center">Choose a payment method to continue.</p>`:""}</div>`;
+}
+function ringHTML(o){
+ return `<div class="ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="54" class="rg-bg"/><circle cx="60" cy="60" r="54" class="rg-fg" data-ring data-start="${o.cookStart||0}" data-total="${prepSec(o)}" data-status="${o.status}" stroke-dasharray="339.3" stroke-dashoffset="0"/></svg><div class="rg-t"><b data-ringtxt>--:--</b><small data-ringsub>est. time</small></div></div>`;
+}
+function guestSide(){
+ const k="T"+G.table,t=S.tables[k],act=tUnpaid(k),o=act.length?act[act.length-1]:null;
+ const cartTotal=sumItems(G.cart);
+ let track="";
+ if(o){
+  const s=o.status,step=s==="PENDING_APPROVAL"?1:s==="COOKING"?2:3;
+  const st=(n,l)=>`<div class="stp ${n<step||(n===3&&step===3)?"done":n===step?"now":""}"><i>${n<step||(n===3&&step===3)?"✓":n}</i>${l}</div>`;
+  track=`<div><div class="sec">Live order · #${o.id}</div><div class="steps">${st(1,"Ordered ✓")}${st(2,"Cooking 🔥")}${st(3,"Ready ✓")}</div>${ringHTML(o)}
+  ${s==="PENDING_APPROVAL"?`<div class="banner wait">⏳ Waiting for staff to confirm your order…</div>`:s==="COOKING"?`<div class="banner cook">🔥 Our chefs are cooking your food</div>`:s==="READY"?`<div class="banner ok">🎉 Your food is on the way!</div>`:`<div class="banner ok">🍽️ Served · enjoy your meal!</div>`}
+  ${act.length>1?`<p class="sub" style="margin-top:8px">+ ${act.length-1} more order(s) on this table</p>`:""}</div>`;
+ }else if(t.paid){
+  track=`<div class="banner ok" style="text-align:center">✅ Paid · thank you!<div class="sub" style="color:#15803D;font-weight:500">Staff will clear your table shortly.</div></div>`;
+ }
+ const hasLassi=G.cart.some(l=>l.id==="lassi");
+ const cart=`<div><div class="sec">Your cart</div>${G.cart.length?G.cart.map(l=>`<div class="cl"><div class="n"><b>${esc(l.name)}${l.deal?` <span class="chip">DEAL</span>`:""}</b><small>${[l.size,l.spice].filter(Boolean).join(" · ")||"&nbsp;"} · ${inr(l.price)}</small></div><div class="qty"><button data-act="qty" data-k="${l.key}" data-v="-1">−</button><span>${l.qty}</span><button data-act="qty" data-k="${l.key}" data-v="1">+</button></div></div>`).join("")
+  :`<div class="empty"><span>🛒</span>Your cart is empty</div>`}
+  ${G.cart.length&&!hasLassi&&menuList().some(x=>x.id==="lassi"&&isAvail(x))?`<div class="upsell"><span style="font-size:26px">🥭</span><div><b>Add Mango Lassi</b><small>Today's deal ₹99 <s>₹120</s></small></div><button data-act="upsell">+ Add</button></div>`:""}
+  ${G.cart.length?`<div class="row tot"><span>Total</span><span>${inr(cartTotal)}</span></div>`:""}
+  <button class="btn" style="margin-top:10px" data-act="place" ${!G.cart.length||t.paid?"disabled":""}>Place Order →</button>
+  ${t.paid?`<p class="sub" style="margin-top:6px;text-align:center">Table is awaiting clearing before new orders.</p>`:""}</div>`;
+ return track+cart;
+}
+function cfgModal(){
+ const c=G.cfg;if(!c)return"";const x=M(c.id);
+ const unitP=unit(x,c.size);
+ return `<div class="modal"><div class="sheet"><div style="display:flex;gap:12px;align-items:center">${imgHTML(x)}<div><h3>${esc(x.name)}</h3><div class="chips" style="margin-top:4px">${allergenChips(x)}</div></div></div>
+ ${x.size?`<div><div class="sec">Size</div><div class="pills">${["Half","Full"].map(s=>`<button class="${c.size===s?"on":""}" data-act="cfg" data-k="size" data-v="${s}">${s} · ${inr(unit(x,s))}</button>`).join("")}</div></div>`:""}
+ ${x.spice?`<div><div class="sec">Spice level</div><div class="pills">${["Mild","Medium","Hot"].map(s=>`<button class="${c.spice===s?"on":""}" data-act="cfg" data-k="spice" data-v="${s}">${s==="Hot"?"🌶️🌶️ ":s==="Medium"?"🌶️ ":""}${s}</button>`).join("")}</div></div>`:""}
+ <div class="row"><div class="qty"><button data-act="cfg" data-k="qty" data-v="-1">−</button><span>${c.qty}</span><button data-act="cfg" data-k="qty" data-v="1">+</button></div><span class="sub">${x.station} · ~${x.prep} min</span></div>
+ <div style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" data-act="cfgx">Cancel</button><button class="btn" style="flex:2" data-act="cfgadd">Add · ${inr(unitP*c.qty)}</button></div></div></div>`;
+}
+function viewGuest(){
+ G.cart=G.cart.filter(l=>menuList().some(x=>x.id===l.id));G.cart.forEach(l=>{if(!l.deal){const x=M(l.id);l.price=unit(x,l.size||"Full")}});
+ const k="T"+G.table,t=S.tables[k],pend=!!t.help;
+ const tabs=[["menu","🍽️ Menu"],["wait","⏳ Wait hub"],["waiter","🔔 Waiter"+(pend?`<span class="pip">1</span>`:"")],["bill","🧾 Bill"]];
+ return `<div class="pane guest" data-role="guest"><div class="g-head"><h1>Zaika<i>.</i></h1><small>Indore • Dine-In</small><span class="tbadge">Table ${G.table}</span></div>
+ <div class="g-body"><div class="g-main" data-keep="gm"><div class="gtabs">${tabs.map(([v,l])=>`<button class="${G.tab===v?"on":""}" data-act="gtab" data-v="${v}">${l}</button>`).join("")}</div>
+ ${G.tab==="menu"?guestMenu():G.tab==="wait"?guestWait():G.tab==="waiter"?guestWaiter():guestBill()}</div>
+ <div class="g-side" data-keep="gs">${guestSide()}</div></div>${cfgModal()}</div>`;
+}
+/* ============ RENDER: STAFF ============ */
+function tagFor(o){return o.status==="PENDING_APPROVAL"?`<span class="tag new">NEW</span>`:o.status==="COOKING"?`<span class="tag cook">COOKING</span>`:o.status==="READY"?`<span class="tag rdy">READY TO SERVE</span>`:`<span class="tag srv">SERVED</span>`}
+function stationTags(o){return[...new Set(o.items.map(l=>l.station))].map(s=>`<span class="tag ${s}">${s}</span>`).join(" ")}
+let MENUED=null;
+const ALLERGENS=["Dairy","Nuts","Gluten","Egg","Soy","Shellfish","Sesame"];
+function menuAdmin(){
+ const L=menuList();
+ return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap"><div><b style="font-size:17px">Menu manager</b><div class="sub" style="color:var(--mut)">${L.length} dishes · changes go live on every guest screen instantly</div></div><button class="dbtn" style="margin-left:auto" data-act="madd">+ Add dish</button></div>
+ <div class="mfloor">${L.map(x=>`<div class="mcard ${isAvail(x)?"":"off"}">${imgHTML(x,"mthumb")}<div class="mbody"><b>${esc(x.name)}</b><div class="mrow"><span class="mp">${inr(x.price)}</span><span class="tag ${x.station}">${x.station}</span><span class="tag">${esc(x.cat||"")}</span></div><div class="sub" style="color:var(--mut);font-size:12px">${esc((x.desc||"").slice(0,70))}${(x.desc||"").length>70?"…":""}</div>
+  <div class="mrow" style="margin-top:6px"><button class="dbtn o sm" data-act="medit" data-id="${x.id}">✎ Edit</button><button class="dbtn sm ${isAvail(x)?"g":"o"}" data-act="mavail" data-id="${x.id}">${isAvail(x)?"Available":"Sold out"}</button></div></div></div>`).join("")}</div>`;
+}
+function menuModal(){
+ if(!MENUED)return"";const d=MENUED.d,isNew=!MENUED.id;
+ const cats=[...new Set(menuList().map(x=>x.cat).filter(Boolean))];
+ return `<div class="dmodal"><div class="dform"><h3 style="margin-bottom:12px">${isNew?"Add new dish":"Edit dish"}</h3>
+ <div class="fgrid">
+  <div class="fimg">${imgHTML({img:d.img,emoji:d.emoji,bg:"#2a2a2a"},"fprev")}<div style="display:grid;gap:6px;flex:1"><label class="dbtn o sm">📷 ${d.img?"Change image":"Upload image"}<input type="file" accept="image/*" data-file hidden></label>${d.img?`<button class="dbtn o sm" data-act="mimgx">Remove image</button>`:""}<div class="sub" style="color:var(--mut);font-size:11.5px">Square photos look best. Without one, the emoji below is shown.</div></div></div>
+  <label>Dish name<input data-f="name" value="${esc(d.name)}" placeholder="e.g. Butter Chicken" maxlength="60"></label>
+  <label>Price (₹)<input data-f="price" type="number" min="1" inputmode="numeric" value="${esc(d.price)}" placeholder="320"></label>
+  <label class="full">Description<textarea data-f="desc" rows="2" maxlength="140" placeholder="Short, tasty description">${esc(d.desc)}</textarea></label>
+  <label>Category<input data-f="cat" list="catl" value="${esc(d.cat)}" placeholder="Mains"><datalist id="catl">${cats.map(c=>`<option value="${esc(c)}">`).join("")}</datalist></label>
+  <label>Kitchen station<select data-f="station">${STATIONS.map(x=>`<option ${d.station===x?"selected":""}>${x}</option>`).join("")}</select></label>
+  <label>Prep time (min)<input data-f="prep" type="number" min="1" value="${esc(d.prep)}"></label>
+  <label>Emoji (fallback)<input data-f="emoji" value="${esc(d.emoji)}" maxlength="4"></label>
+  <div class="full"><div class="sub" style="color:var(--mut);margin-bottom:6px">Allergens</div><div class="achips">${ALLERGENS.map(a=>`<label class="ac"><input type="checkbox" data-f="al" data-v="${a}" ${d.al.includes(a)?"checked":""}><span>${a}</span></label>`).join("")}</div></div>
+  <div class="full achips"><label class="ac"><input type="checkbox" data-f="size" ${d.size?"checked":""}><span>Half / Full sizes</span></label><label class="ac"><input type="checkbox" data-f="spice" ${d.spice?"checked":""}><span>Spice level</span></label><label class="ac"><input type="checkbox" data-f="avail" ${d.avail?"checked":""}><span>Available</span></label></div>
+ </div>
+ ${MENUED.err?`<div class="perr" style="text-align:left;margin-top:8px">${esc(MENUED.err)}</div>`:""}
+ <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">${isNew?"":`<button class="dbtn o" style="color:#ff8f8f" data-act="mdel">${MENUED.confirm?"Tap again to delete":"🗑 Delete"}</button>`}<button class="dbtn o" style="margin-left:auto" data-act="mcancel">Cancel</button><button class="dbtn" data-act="msave">${isNew?"Add dish":"Save changes"}</button></div></div></div>`;
+}
+ACT.madd=()=>ui(()=>{MENUED={id:null,err:"",d:{name:"",price:"",desc:"",cat:"Mains",station:"CURRY",prep:10,emoji:"🍽️",al:[],size:false,spice:false,img:"",avail:true}}});
+ACT.medit=d=>ui(()=>{const x=M(d.id);MENUED={id:x.id,err:"",d:{name:x.name,price:String(x.price),desc:x.desc||"",cat:x.cat||"",station:x.station,prep:x.prep,emoji:x.emoji||"🍽️",al:[...(x.al||[])],size:!!x.size,spice:!!x.spice,img:x.img||"",avail:isAvail(x)}}});
+ACT.mcancel=()=>ui(()=>{MENUED=null});
+ACT.mimgx=()=>ui(()=>{MENUED.d.img=""});
+ACT.mavail=d=>commit(s=>{const x=s.menu.find(a=>a.id===d.id);if(x)x.avail=!(x.avail!==false)},{t:"station",aud:["guest"],msg:{guest:"The menu was just updated"}});
+ACT.mdel=()=>{
+ if(!MENUED.confirm){MENUED.confirm=true;render();return}
+ const id=MENUED.id,nm=MENUED.d.name;MENUED=null;
+ commit(s=>{s.menu=s.menu.filter(a=>a.id!==id)},{t:"station",aud:["guest"],msg:{guest:`${nm} was removed from the menu`}});
+};
+ACT.msave=()=>{
+ const d=MENUED.d,price=Math.round(Number(d.price)),prep=Math.max(1,Math.round(Number(d.prep))||10);
+ if(!d.name.trim()){MENUED.err="Please enter a dish name";render();return}
+ if(!(price>0)){MENUED.err="Please enter a price above ₹0";render();return}
+ const id=MENUED.id||("d"+Date.now().toString(36)),isNew=!MENUED.id;
+ const bgs=["#FFE9D6","#F6E3C8","#FFF0C2","#F8E8C9","#FFD9C7","#FFEFB8","#EFE0CF","#F6DCD0"];
+ const item={id,name:d.name.trim(),price,station:d.station,prep,cat:d.cat.trim()||"Mains",emoji:d.emoji.trim()||"🍽️",desc:d.desc.trim(),al:[...d.al],size:!!d.size,spice:!!d.spice,img:d.img||"",avail:!!d.avail};
+ MENUED=null;
+ commit(s=>{const i=s.menu.findIndex(a=>a.id===id);if(i>=0){item.bg=s.menu[i].bg;s.menu[i]=item}else{item.bg=bgs[s.menu.length%bgs.length];s.menu.push(item)}},
+  {t:"station",aud:["guest"],msg:{guest:isNew?`New on the menu: ${item.name}`:`Menu updated: ${item.name} · ${inr(price)}`}});
+};
+document.addEventListener("input",e=>{
+ const t=e.target;if(!MENUED||!t.dataset||!t.dataset.f)return;const f=t.dataset.f;
+ if(f==="al"){const a=MENUED.d.al,v=t.dataset.v,i=a.indexOf(v);if(t.checked&&i<0)a.push(v);if(!t.checked&&i>=0)a.splice(i,1)}
+ else if(t.type==="checkbox")MENUED.d[f]=t.checked;else MENUED.d[f]=t.value;
+});
+function readImg(file){return new Promise(res=>{const fr=new FileReader();fr.onerror=()=>res("");fr.onload=()=>{const im=new Image();im.onerror=()=>res("");im.onload=()=>{const side=Math.min(im.width,im.height),sx=(im.width-side)/2,sy=(im.height-side)/2,c=document.createElement("canvas");c.width=c.height=400;c.getContext("2d").drawImage(im,sx,sy,side,side,0,0,400,400);res(c.toDataURL("image/jpeg",.78))};im.src=fr.result};fr.readAsDataURL(file)})}
+document.addEventListener("change",async e=>{
+ const t=e.target;if(!t.matches||!t.matches("[data-file]")||!MENUED)return;
+ const f=t.files&&t.files[0];if(!f)return;
+ const u=await readImg(f);if(!u){MENUED.err="That image couldn't be read. Try a JPG or PNG.";render();return}
+ MENUED.d.img=u;MENUED.err="";render();
+});
+function staffTools(){
+ return `<div class="dtools"><span>Timers</span><div class="seg">${[1,10,30].map(x=>`<button class="${(S.speed||1)===x?"on":""}" data-act="speed" data-v="${x}">${x}×</button>`).join("")}</div>
+ <button class="sbtn" data-act="sound">${soundOn?"🔔 Sound on":"🔕 Sound off"}</button><button class="sbtn" data-act="go" data-v="split">▦ Split view</button><button class="sbtn" data-act="reset">↺ Reset demo</button><button class="sbtn" data-act="lock" data-r="staff">🔒 Lock</button></div>`;
+}
+function viewStaff(){
+ const act=S.orders.filter(o=>!o.cleared&&o.status!=="PAID");
+ const grp=[["NEW ORDERS",act.filter(o=>o.status==="PENDING_APPROVAL")],["IN KITCHEN",act.filter(o=>o.status==="COOKING")],["READY TO SERVE",act.filter(o=>o.status==="READY")],["SERVED",act.filter(o=>o.status==="SERVED")]];
+ const nNew=grp[0][1].length;
+ const selO=act.find(o=>o.id===ST.sel)||grp.flatMap(g=>g[1])[0];
+ const active=Object.keys(S.tables).filter(k=>tState(k)!=="IDLE").length;
+ const helps=Object.entries(S.tables).filter(([k,t])=>t.help);
+ const card=o=>`<div class="qc ${selO&&o.id===selO.id?"sel":""}" data-act="sel" data-id="${o.id}"><div class="l1"><b>Table ${tnum(o.table)}</b><span class="mono" style="color:var(--mut)">#${o.id}</span><span style="margin-left:auto">${tagFor(o)}</span></div><small>${o.items.reduce((a,l)=>a+l.qty,0)} items · ${inr(o.total)} ${o.status==="COOKING"?`· <span class="tm" data-el="since" data-start="${o.cookStart}">00:00</span>`:""}</small></div>`;
+ const queue=grp.map(([n,a])=>a.length?`<div class="qh">${n} <span class="tag">${a.length}</span></div>${a.map(card).join("")}`:"").join("")||`<div class="none">No active orders 🎉</div>`;
+ let det=`<div class="det none">Select an order</div>`;
+ if(selO){
+  const o=selO;
+  det=`<div class="det"><h3>Table ${tnum(o.table)} <span class="mono" style="color:var(--mut);font-size:15px">#${o.id}</span> ${tagFor(o)}</h3><p class="sub" style="color:var(--mut);margin:4px 0 6px">${stationTags(o)}</p>
+  ${o.items.map(l=>`<div class="dl"><span class="q">${l.qty}×</span><div class="n">${esc(l.name)}<small>${[l.size,l.spice].filter(Boolean).join(" · ")||"—"}</small></div><span class="tag ${l.station}">${l.station}</span><b>${inr(lineTotal(l))}</b></div>`).join("")}
+  <div class="row" style="padding:12px 0;font-weight:800;font-size:17px"><span>Total</span><span>${inr(o.total)}</span></div>
+  ${o.status==="PENDING_APPROVAL"?`<button class="dbtn" data-act="send" data-id="${o.id}">Send to kitchen →</button>`
+  :o.status==="COOKING"?`<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div><div class="sub" style="color:var(--mut)">Cooking</div><div class="tm big" data-el="since" data-start="${o.cookStart}">00:00</div></div><div style="display:flex;gap:6px;flex-wrap:wrap">${Object.entries(o.tickets).map(([s,t])=>`<span class="tag ${t.status==="READY"?"rdy":s}">${s} ${t.status==="READY"?"✓":"…"}</span>`).join("")}</div><button class="dbtn o" style="margin-left:auto" data-act="serve" data-id="${o.id}">Mark Served</button></div>`
+  :o.status==="READY"?`<div class="ready-alert">✅ READY TO SERVE · Table ${tnum(o.table)}</div><button class="dbtn g" data-act="serve" data-id="${o.id}">Mark Served</button>`
+  :`<p class="sub" style="color:var(--mut)">Served. Waiting for the guest to pay.</p>`}</div>`;
+ }
+ const floor=Object.keys(S.tables).map(k=>{
+  const t=S.tables[k],s=tState(k),os=tUnpaid(k),rd=os.find(o=>o.status==="READY"),pend=os.find(o=>o.status==="PENDING_APPROVAL");
+  const due=sumItems(os.flatMap(o=>o.items));
+  return `<div class="tbl s-${s} ${t.help?"help":""}">${t.help?`<span class="helpb">HELP · ${esc(t.help.type)}</span>`:""}
+  <h4>${k}<span class="st ${s}">${s==="PAID"?"PAID / CLEAR TABLE":s}</span></h4>
+  <div class="sub" style="color:var(--mut)">${os.length?os.map(o=>"#"+o.id).join(", ")+" · "+inr(due):s==="PAID"?"Bill settled "+(t.receipt?inr(t.receipt.total):""):"Available"}</div>
+  ${rd?`<div class="ready-alert" style="margin:0;padding:6px 10px;font-size:12.5px">READY TO SERVE</div>`:""}
+  ${pend?`<div class="sub" style="color:var(--or2);font-weight:700">New order awaiting approval</div>`:""}
+  <div class="acts">${t.help?`<button class="dbtn sm" data-act="resolve" data-t="${k}">Mark Resolved</button>`:""}${rd?`<button class="dbtn g sm" data-act="serve" data-id="${rd.id}">Mark Served</button>`:""}${pend?`<button class="dbtn o sm" data-act="send" data-id="${pend.id}">Send to kitchen →</button>`:""}${s==="PAID"?`<button class="dbtn o sm" data-act="clear" data-t="${k}">Clear table · reset</button>`:""}</div></div>`}).join("");
+ return `<div class="pane dark" data-role="staff"><div class="d-top"><h2>Zaika<i>.</i> Staff &amp; Floor</h2>${staffTools()}<div class="kpis">
+  <div class="kpi"><small>Active tables</small><b>${active}<span style="color:var(--mut);font-size:14px"> / 6</span></b></div>
+  <div class="kpi" data-bump="o${S.stats.orders}"><small>Total orders</small><b>${S.stats.orders}</b></div>
+  <div class="kpi" data-bump="s${S.stats.sales}"><small>Tonight's sales</small><b class="or">${inr(S.stats.sales)}</b></div></div></div>
+  ${helps.map(([k,t])=>`<div class="alert"><span style="font-size:20px">🔔</span><b>Table ${tnum(k)} requested: ${esc(t.help.type)}</b><span class="tm" data-el="real" data-start="${t.help.ts}">00:00</span><button data-act="resolve" data-t="${k}">Mark Resolved</button></div>`).join("")}
+  <div class="dtabs"><button class="${ST.tab==="orders"?"on":""}" data-act="stab" data-v="orders">New Orders${nNew?`<span class="nbadge">${nNew}</span>`:""}</button><button class="${ST.tab==="floor"?"on":""}" data-act="stab" data-v="floor">Live Floor Map${helps.length?`<span class="nbadge" style="background:var(--rd)">${helps.length}</span>`:""}</button><button class="${ST.tab==="menu"?"on":""}" data-act="stab" data-v="menu">Menu</button></div>
+  <div class="d-body" data-keep="sd">${ST.tab==="orders"?`<div class="two"><div>${queue}</div>${det}</div>`:ST.tab==="menu"?menuAdmin():`<div class="floor">${floor}</div>`}</div>${ST.tab==="menu"?menuModal():""}</div>`;
+}
+/* ============ RENDER: KDS ============ */
+function viewKDS(){
+ const orders=S.orders.filter(o=>!o.cleared&&(o.status==="COOKING"||o.status==="READY")).sort((a,b)=>a.cookStart-b.cookStart);
+ const cols=STATIONS.map(st=>{
+  const tk=orders.filter(o=>o.tickets[st]);
+  const pending=tk.filter(o=>o.tickets[st].status==="COOKING").length;
+  return `<div class="col"><div class="col-h"><span>${st}</span><span class="c" style="color:${pending?"var(--or2)":"var(--mut)"}">${pending}</span></div><div class="col-b" data-keep="k${st}">${tk.length?tk.map(o=>{
+   const t=o.tickets[st],ready=t.status==="READY",its=o.items.filter(l=>l.station===st);
+   return `<div class="tk ${ready?"rdy":""}"><div class="tk-h"><span class="tb">T${tnum(o.table)}</span><span class="mono" style="color:var(--mut)">#${o.id}</span>${ready?`<span class="tm t-g">READY ✓</span>`:`<span class="tm" data-el="since" data-start="${t.start}" data-color="1">00:00</span>`}</div>
+   <ul>${its.map(l=>`<li><b>${l.qty}×</b><span>${esc(l.name)}${l.size||l.spice?` <small>${[l.size,l.spice].filter(Boolean).join(" · ")}</small>`:""}</span></li>`).join("")}</ul>
+   ${ready?`<div class="sub" style="color:#7ff0a8">Station complete</div>`:`<button class="dbtn g" data-act="station" data-id="${o.id}" data-st="${st}">Mark Ready</button>`}</div>`}).join(""):`<div class="none">No ${st.toLowerCase()} tickets</div>`}</div></div>`}).join("");
+ return `<div class="pane dark" data-role="kitchen"><div class="d-top"><h2>Zaika<i>.</i> Kitchen Display</h2><div class="dtools"><button class="sbtn" data-act="sound">${soundOn?"🔔 Sound on":"🔕 Sound off"}</button><button class="sbtn" data-act="lock" data-r="kitchen">🔒 Lock</button></div><span class="tm clock" data-el="clock">--:--:--</span></div><div class="kds">${cols}</div></div>`;
+}
+/* ============ RENDER: ROOT ============ */
+function render(){
+ const ae=document.activeElement,fk=ae&&ae.dataset&&ae.type!=="checkbox"&&ae.dataset.f,fsel=fk&&ae.selectionStart!=null?[ae.selectionStart,ae.selectionEnd]:null;
+ const keep={};document.querySelectorAll("[data-keep]").forEach(n=>keep[n.dataset.keep+"|"+(n.closest("[data-role]")||{dataset:{}}).dataset.role]=n.scrollTop);
+ document.getElementById("bar").innerHTML=renderBar();
+ document.getElementById("pin").innerHTML=pinHTML();
+ const app=document.getElementById("app");
+ const labelled=(h,l)=>h.replace('class="pane',`class="pane`).replace(/(<div class="pane[^>]*>)/,`$1<span class="plabel">${l}</span>`);
+ app.innerHTML=view==="guest"?viewGuest():view==="staff"?viewStaff():view==="kitchen"?viewKDS():`<div class="split">${labelled(viewGuest(),"Guest · Table "+G.table)}${labelled(viewStaff(),"Staff Dashboard")}${labelled(viewKDS(),"Kitchen Display")}</div>`;
+ document.querySelectorAll("[data-keep]").forEach(n=>{const v=keep[n.dataset.keep+"|"+(n.closest("[data-role]")||{dataset:{}}).dataset.role];if(v)n.scrollTop=v});
+ document.querySelectorAll("[data-bump]").forEach(n=>{const k=n.dataset.bump;if(bumpMem[n.closest("[data-role]")?.dataset.role+k.charAt(0)]!==undefined&&bumpMem[n.closest("[data-role]")?.dataset.role+k.charAt(0)]!==k){n.classList.add("bump")}bumpMem[n.closest("[data-role]")?.dataset.role+k.charAt(0)]=k});
+ if(fk){const n=document.querySelector(`[data-f="${fk}"]`);if(n){n.focus();try{if(fsel)n.setSelectionRange(fsel[0],fsel[1])}catch(e){}}}
+ tick();
+}
+const bumpMem={};
+const RC=339.3;
+function tick(){
+ const now=new Date();
+ document.querySelectorAll("[data-el]").forEach(n=>{
+  const t=n.dataset.el;
+  if(t==="clock")n.textContent=now.toLocaleTimeString([], {hour12:false});
+  else if(t==="real")n.textContent=(n.dataset.pre||"")+mmss((Date.now()-+n.dataset.start)/1000);
+  else if(t==="since"){const s=el(+n.dataset.start);n.textContent=mmss(s);
+   if(n.dataset.color){n.classList.remove("t-g","t-a","t-r");n.classList.add(s<180?"t-g":s<360?"t-a":"t-r")}}
+ });
+ document.querySelectorAll("[data-ring]").forEach(n=>{
+  const tot=+n.dataset.total,st=n.dataset.status,box=n.closest(".ring"),tx=box.querySelector("[data-ringtxt]"),sb=box.querySelector("[data-ringsub]");
+  if(st==="PENDING_APPROVAL"){tx.textContent=mmss(tot);sb.textContent="est. time";n.style.strokeDashoffset=0;n.classList.remove("ok")}
+  else if(st==="COOKING"){const rem=tot-el(+n.dataset.start);tx.textContent=rem>0?mmss(rem):"00:00";sb.textContent=rem>0?"min left":"almost there";n.style.strokeDashoffset=RC*(1-Math.max(0,rem/tot));n.classList.remove("ok")}
+  else{tx.textContent="✓";sb.textContent="ready";n.style.strokeDashoffset=0;n.classList.add("ok")}
+ });
+}
+setInterval(tick,1000);
+window.addEventListener("hashchange",()=>{parseHash();render()});
+parseHash();render();
+</script>
+</body>
+</html>

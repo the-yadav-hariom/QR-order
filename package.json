@@ -1,0 +1,16 @@
+{
+  "name": "zaiki",
+  "version": "1.0.0",
+  "description": "Zaika Live Restaurant Management System - React.js + Tailwind CSS Client & Node.js Service",
+  "scripts": {
+    "start": "node service/server.js",
+    "build": "npm --prefix client run build",
+    "service": "node service/server.js",
+    "dev:service": "node --watch service/server.js",
+    "dev:client": "npm --prefix client run dev",
+    "build:client": "npm --prefix client run build"
+  },
+  "keywords": ["zaika", "react", "nodejs", "tailwind", "restaurant-pos", "kds"],
+  "author": "",
+  "license": "ISC"
+}

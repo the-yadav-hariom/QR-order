@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0F0F0F;
+  --card: #1A1A1A;
+  --card2: #212121;
+  --line: #2A2A2A;
+  --tx: #F2EEE8;
+  --mut: #8D8780;
+  --or: #F25C2A;
+  --or2: #ff7a47;
+  --gr: #22C55E;
+  --am: #F5A524;
+  --rd: #EF4444;
+  --bl: #5B7CFF;
+  --cream: #FAF8F5;
+  --ink: #1A1A1A;
+  --ink2: #6B655E;
+  --gline: #EAE4DC;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: var(--bg);
+  color: var(--tx);
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Custom zigzag receipt bottom edge */
+.zig {
+  height: 9px;
+  margin: 0 -20px;
+  background: conic-gradient(from -45deg at bottom, #0000, #fff 1deg 90deg, #0000 91deg) 50% / 12px 100%;
+  position: relative;
+  top: 9px;
+  background-color: transparent;
+}
+
+/* Pulse animation for live indicators */
+@keyframes pl {
+  70% { box-shadow: 0 0 0 7px rgba(34, 197, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 0 0 rgba(242, 92, 42, 0.5); }
+  100% { box-shadow: 0 0 0 10px rgba(242, 92, 42, 0); }
+}
+
+@keyframes flash {
+  50% { background: linear-gradient(90deg, rgba(239, 68, 68, 0.4), rgba(242, 92, 42, 0.3)); }
+}
+
+@keyframes flash2 {
+  50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.35); background: #271613; }
+}
+
+@keyframes flashg {
+  50% { background: rgba(34, 197, 94, 0.28); }
+}
+
+@keyframes bump {
+  30% { border-color: var(--gr); transform: scale(1.05); }
+}
+
+@keyframes shk {
+  20%, 60% { transform: translateX(-9px); }
+  40%, 80% { transform: translateX(9px); }
+}
+
+@keyframes stamp {
+  from { transform: rotate(-12deg) scale(2.4); opacity: 0; }
+  to { transform: rotate(-12deg) scale(1); opacity: 1; }
+}
+
+@keyframes rin {
+  from { transform: translateY(-30px) scaleY(0.7); opacity: 0; }
+}
+
+.anim-dot {
+  animation: pl 2s infinite;
+}
+
+.anim-glow {
+  animation: glow 1.6s infinite;
+}
+
+.anim-flash {
+  animation: flash 1.4s infinite;
+}
+
+.anim-flash-table {
+  animation: flash2 1.1s infinite;
+}
+
+.anim-flash-green {
+  animation: flashg 1.6s infinite;
+}
+
+.anim-bump {
+  animation: bump 0.8s;
+}
+
+.anim-shake {
+  animation: shk 0.4s;
+}
+
+.anim-stamp {
+  animation: stamp 0.5s 0.5s both;
+}
+
+.anim-receipt {
+  animation: rin 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Hide scrollbar utility across all browsers (can't show scrollbar, only scroll) */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar,
+.scrollbar-none {
+  -ms-overflow-style: none !important; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+  -webkit-overflow-scrolling: touch;
+}

@@ -1,0 +1,14 @@
+{
+  "name": "zaika-service",
+  "version": "1.0.0",
+  "description": "Zaika Restaurant Live Backend Service built with pure Node.js (Zero external dependencies required)",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": ["zaika", "restaurant", "pos", "kds", "nodejs", "realtime", "sse"],
+  "author": "",
+  "license": "ISC"
+}
