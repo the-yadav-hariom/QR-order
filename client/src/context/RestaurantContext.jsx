@@ -337,7 +337,10 @@ export function RestaurantProvider({ children }) {
     if (!roles.length) return;
 
     if (notification.t === 'help') {
-      playBellRingtone(notification.table, notification.helpType || notification.type || 'Waiter');
+      // ONLY play loud service bell ringtone and voice announcement on Staff or Split view (NOT on Guest side)
+      if (view === 'staff' || view === 'split') {
+        playBellRingtone(notification.table, notification.helpType || notification.type || 'Waiter');
+      }
     } else {
       beep(notification.t);
     }
@@ -848,8 +851,10 @@ export function RestaurantProvider({ children }) {
       return nextState;
     });
 
-    // 2. Play audible service bell ringtone & speech announcement
-    playBellRingtone(k, helpType);
+    // 2. Play audible service bell ringtone & speech announcement ONLY on staff side
+    if (view === 'staff' || view === 'split') {
+      playBellRingtone(k, helpType);
+    }
 
     // 3. Add toast notification
     addToast({
@@ -859,8 +864,8 @@ export function RestaurantProvider({ children }) {
       c: 'r',
       helpType,
       msg: {
-        guest: `Waiter summoned for "${helpType}". Staff alerted!`,
-        staff: `Table ${guestTable} requested: ${helpType}`,
+        guest: `✓ Captain requested for "${helpType}". Staff alerted!`,
+        staff: `🔔 Table ${guestTable} requested: ${helpType}`,
       },
     });
 
