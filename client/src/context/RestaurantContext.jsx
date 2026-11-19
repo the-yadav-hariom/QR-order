@@ -5,14 +5,138 @@ const RestaurantContext = createContext();
 export const STATIONS = ['TANDOOR', 'CURRY', 'DRINKS'];
 
 export const DEFAULT_MENU = [
-  { id: 'paneer', name: 'Paneer Makhani', price: 320, station: 'CURRY', prep: 14, cat: 'Mains', emoji: '🍛', bg: '#FFE9D6', desc: 'Cottage cheese in a buttery tomato-cashew gravy', al: ['Dairy', 'Nuts'], size: true, spice: true, avail: true },
-  { id: 'dal', name: 'Dal Makhani', price: 280, station: 'CURRY', prep: 12, cat: 'Mains', emoji: '🥘', bg: '#F6E3C8', desc: 'Slow-cooked black lentils finished with cream', al: ['Dairy'], size: true, spice: true, avail: true },
-  { id: 'biryani', name: 'Veg Biryani', price: 300, station: 'CURRY', prep: 18, cat: 'Mains', emoji: '🍚', bg: '#FFF0C2', desc: 'Fragrant dum-cooked basmati with garden vegetables', al: ['Dairy'], size: true, spice: true, avail: true },
-  { id: 'naan', name: 'Garlic Naan', price: 70, station: 'TANDOOR', prep: 6, cat: 'Breads', emoji: '🫓', bg: '#F8E8C9', desc: 'Tandoor-baked bread brushed with garlic butter', al: ['Gluten', 'Dairy'], avail: true },
-  { id: 'tikka', name: 'Tandoori Paneer Tikka', price: 260, station: 'TANDOOR', prep: 12, cat: 'Starters', emoji: '🍢', bg: '#FFD9C7', desc: 'Char-grilled marinated paneer, peppers and onion', al: ['Dairy'], size: true, spice: true, avail: true },
-  { id: 'lassi', name: 'Mango Lassi', price: 120, station: 'DRINKS', prep: 3, cat: 'Drinks', emoji: '🥭', bg: '#FFEFB8', desc: 'Chilled yogurt shake with Alphonso mango', al: ['Dairy'], avail: true },
-  { id: 'chai', name: 'Masala Chai', price: 60, station: 'DRINKS', prep: 4, cat: 'Drinks', emoji: '🍵', bg: '#EFE0CF', desc: 'Hot milk tea with ginger and cardamom', al: ['Dairy'], avail: true },
-  { id: 'jamun', name: 'Gulab Jamun', price: 80, station: 'CURRY', prep: 3, cat: 'Desserts', emoji: '🍮', bg: '#F6DCD0', desc: 'Warm milk dumplings in rose-cardamom syrup', al: ['Dairy', 'Gluten'], avail: true }
+  {
+    id: 'paneer',
+    name: 'Paneer Makhani',
+    price: 320,
+    station: 'CURRY',
+    prep: 14,
+    cat: 'Mains',
+    emoji: '🍛',
+    bg: '#FFE9D6',
+    desc: 'Fresh Malwa paneer, slow-cooked creamy makhani gravy with aromatic spices.',
+    img: 'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    spiceLevel: 2,
+    al: ['Dairy', 'Nuts'],
+    size: true,
+    spice: true,
+    avail: true,
+  },
+  {
+    id: 'dal',
+    name: 'Dal Makhani (Zaika Special)',
+    price: 280,
+    station: 'CURRY',
+    prep: 12,
+    cat: 'Mains',
+    emoji: '🥘',
+    bg: '#F6E3C8',
+    desc: 'Simmered overnight for 16 hours with cream, butter, and mild Kashmiri spices.',
+    img: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    spiceLevel: 1,
+    al: ['Dairy'],
+    size: true,
+    spice: true,
+    avail: true,
+  },
+  {
+    id: 'biryani',
+    name: 'Veg Dum Biryani',
+    price: 300,
+    station: 'CURRY',
+    prep: 18,
+    cat: 'Mains',
+    emoji: '🍚',
+    bg: '#FFF0C2',
+    desc: 'Basmati cooked on sealed dum with garden vegetables, saffron & mint.',
+    img: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    spiceLevel: 2,
+    al: ['Dairy'],
+    size: true,
+    spice: true,
+    avail: true,
+  },
+  {
+    id: 'naan',
+    name: 'Garlic Naan',
+    price: 70,
+    station: 'TANDOOR',
+    prep: 6,
+    cat: 'Breads',
+    emoji: '🫓',
+    bg: '#F8E8C9',
+    desc: 'Tandoor-baked leavened bread brushed with fresh garlic butter.',
+    img: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    al: ['Gluten', 'Dairy'],
+    avail: true,
+  },
+  {
+    id: 'tikka',
+    name: 'Tandoori Paneer Tikka',
+    price: 260,
+    station: 'TANDOOR',
+    prep: 12,
+    cat: 'Starters',
+    emoji: '🍢',
+    bg: '#FFD9C7',
+    desc: 'Char-grilled cottage cheese cubes with tandoori spices and mint dip.',
+    img: 'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    spiceLevel: 2,
+    al: ['Dairy'],
+    size: true,
+    spice: true,
+    avail: true,
+  },
+  {
+    id: 'lassi',
+    name: 'Mango Lassi',
+    price: 120,
+    station: 'DRINKS',
+    prep: 3,
+    cat: 'Drinks',
+    emoji: '🥭',
+    bg: '#FFEFB8',
+    desc: 'Traditional chilled yogurt smoothie blended with sweet Alphonso mango.',
+    img: 'https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    al: ['Dairy'],
+    avail: true,
+  },
+  {
+    id: 'chai',
+    name: 'Masala Chai',
+    price: 60,
+    station: 'DRINKS',
+    prep: 4,
+    cat: 'Drinks',
+    emoji: '🍵',
+    bg: '#EFE0CF',
+    desc: 'Brewed black tea with ginger, green cardamom and whole spices.',
+    img: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    al: ['Dairy'],
+    avail: true,
+  },
+  {
+    id: 'jamun',
+    name: 'Gulab Jamun',
+    price: 80,
+    station: 'CURRY',
+    prep: 3,
+    cat: 'Desserts',
+    emoji: '🍮',
+    bg: '#F6DCD0',
+    desc: 'Golden fried milk solids soaked in warm rose-scented cardamom syrup.',
+    img: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80',
+    veg: true,
+    al: ['Dairy', 'Gluten'],
+    avail: true,
+  },
 ];
 
 export const QUIZ_QUESTIONS = [
@@ -290,29 +414,69 @@ export function RestaurantProvider({ children }) {
     };
   }, [view, guestTable]);
 
-  // Hash Routing
+  // Multi-Link & Multi-Host Routing
   useEffect(() => {
-    const handleHash = () => {
-      const h = (window.location.hash || '').slice(1);
-      const m = h.match(/^guest-?([1-6])?$/);
-      if (m) {
-        if (m[1]) setGuestTable(Number(m[1]));
-        routeTo('guest');
-      } else if (['staff', 'kitchen', 'split'].includes(h)) {
-        routeTo(h);
+    const handleUrl = () => {
+      const pathname = (window.location.pathname || '').toLowerCase();
+      const hash = (window.location.hash || '').slice(1).toLowerCase();
+      const search = new URLSearchParams(window.location.search);
+      const port = window.location.port;
+
+      // 1. Auxiliary dedicated port hosts
+      if (port === '5001') {
+        routeTo('staff', false);
+        return;
+      }
+      if (port === '5002') {
+        routeTo('kitchen', false);
+        return;
+      }
+      if (port === '5003') {
+        routeTo('guest', false);
+        return;
+      }
+
+      // 2. Extract table number if specified in query or path
+      const queryTable = search.get('table') || search.get('t');
+      if (queryTable) {
+        const num = parseInt(queryTable.replace(/[^0-9]/g, '')) || 1;
+        setGuestTable(num);
+      }
+
+      // 3. Match pathname or hash or query role
+      if (pathname.startsWith('/staff') || hash === 'staff' || search.get('role') === 'staff') {
+        routeTo('staff', false);
+      } else if (pathname.startsWith('/kitchen') || hash === 'kitchen' || search.get('role') === 'kitchen') {
+        routeTo('kitchen', false);
+      } else if (pathname.startsWith('/split') || hash === 'split' || search.get('role') === 'split') {
+        routeTo('split', false);
+      } else if (pathname.startsWith('/table/') || pathname.startsWith('/guest/')) {
+        const parts = pathname.split('/').filter(Boolean);
+        const rawTable = parts[1] || '1';
+        const num = parseInt(rawTable.replace(/[^0-9]/g, '')) || 1;
+        setGuestTable(num);
+        routeTo('guest', false);
       } else {
-        routeTo('guest');
+        const m = hash.match(/^guest-?([0-9]+)?$/);
+        if (m && m[1]) {
+          setGuestTable(Number(m[1]));
+        }
+        routeTo('guest', false);
       }
     };
 
-    window.addEventListener('hashchange', handleHash);
-    handleHash();
+    window.addEventListener('hashchange', handleUrl);
+    window.addEventListener('popstate', handleUrl);
+    handleUrl();
 
-    return () => window.removeEventListener('hashchange', handleHash);
+    return () => {
+      window.removeEventListener('hashchange', handleUrl);
+      window.removeEventListener('popstate', handleUrl);
+    };
   }, [auth]);
 
-  // Route protection with PIN
-  const routeTo = (targetView) => {
+  // Route protection with PIN & URL Synchronization
+  const routeTo = (targetView, updateHistory = true) => {
     const need = targetView === 'staff' ? ['staff'] : targetView === 'kitchen' ? ['kitchen'] : targetView === 'split' ? ['staff', 'kitchen'] : [];
     const missing = need.filter((r) => !auth[r]);
 
@@ -322,7 +486,17 @@ export function RestaurantProvider({ children }) {
     } else {
       setPinModal(null);
       setView(targetView);
-      window.location.hash = targetView === 'guest' ? `guest-${guestTable}` : targetView;
+
+      // Clean browser URL push/replace
+      if (updateHistory) {
+        try {
+          const targetPath = targetView === 'guest' ? `/table/${guestTable}` : `/${targetView}`;
+          if (window.location.pathname !== targetPath && !['5001', '5002', '5003'].includes(window.location.port)) {
+            window.history.pushState(null, '', targetPath);
+          }
+          window.location.hash = targetView === 'guest' ? `guest-${guestTable}` : targetView;
+        } catch (e) {}
+      }
     }
   };
 
@@ -390,26 +564,64 @@ export function RestaurantProvider({ children }) {
     if (!cart.length || (state.tables[k] && state.tables[k].paid)) return;
 
     const items = cart.map(({ key, ...item }) => item);
-    const res = await callAPI('/orders', 'POST', { table: k, items });
-    setCart([]);
+    const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+    const tempId = state.nextId || Math.floor(Date.now() / 1000);
+    const now = Date.now();
 
-    if (!res) {
-      // Local fallback
-      const total = items.reduce((s, i) => s + i.price * i.qty, 0);
-      const id = state.nextId;
-      const nextState = {
-        ...state,
-        nextId: id + 1,
-        loyalty: state.loyalty + Math.floor(total / 10),
-        orders: [...state.orders, { id, table: k, items, status: 'PENDING_APPROVAL', createdAt: Date.now(), tickets: {}, total }],
-      };
-      setState(nextState);
-      addToast({
-        t: 'new_order',
-        aud: ['staff'],
+    // 1. Instant optimistic state update
+    setState((prev) => {
+      const nextId = (prev.nextId || tempId) + 1;
+      const newOrder = {
+        id: prev.nextId || tempId,
         table: k,
-        msg: { staff: `New order #${id} from Table ${guestTable} · ${inr(total)}` },
-      });
+        items,
+        status: 'PENDING_APPROVAL',
+        createdAt: now,
+        tickets: {},
+        total,
+      };
+      const nextState = {
+        ...prev,
+        nextId,
+        loyalty: (prev.loyalty || 0) + Math.floor(total / 10),
+        orders: [...(prev.orders || []), newOrder],
+        rev: (prev.rev || 0) + 1,
+      };
+      try {
+        localStorage.setItem('zaika_state_v1', JSON.stringify(nextState));
+        if (bcRef.current) {
+          bcRef.current.postMessage({
+            s: nextState,
+            evt: {
+              t: 'new_order',
+              aud: ['staff'],
+              table: k,
+              msg: { staff: `🔔 New Order #${newOrder.id} from Table ${guestTable} · ${inr(total)}` },
+            },
+          });
+        }
+      } catch (e) {}
+      return nextState;
+    });
+
+    setCart([]);
+    setGuestTab('wait'); // Instantly switch guest to Live Wait tab
+    beep('new_order');
+
+    addToast({
+      t: 'new_order',
+      aud: ['staff', 'guest'],
+      table: k,
+      msg: {
+        guest: `✓ Order placed! Waiting for staff confirmation...`,
+        staff: `🔔 New Order #${tempId} from Table ${guestTable} · ${inr(total)}`,
+      },
+    });
+
+    // 2. Call backend API
+    const res = await callAPI('/orders', 'POST', { table: k, items });
+    if (res && res.state) {
+      setState(res.state);
     }
   };
 
@@ -446,11 +658,59 @@ export function RestaurantProvider({ children }) {
     addToast({
       t: 'sent',
       aud: ['kitchen', 'guest', 'staff'],
-      msg: { all: `Order #${id} confirmed and sent to kitchen 🔥` },
+      msg: { all: `Order #${id} confirmed and dispatched to kitchen 🔥` },
     });
 
     // 2. Call backend API
     const res = await callAPI(`/orders/${id}/send`, 'PATCH');
+    if (res && res.state) {
+      setState(res.state);
+    }
+  };
+
+  const dispatchOrderReady = async (orderId) => {
+    const id = Number(orderId);
+    const now = Date.now();
+
+    // 1. Instant optimistic state update
+    setState((prev) => {
+      const order = (prev.orders || []).find((o) => o.id === id);
+      if (!order) return prev;
+
+      const tickets = { ...(order.tickets || {}) };
+      (order.items || []).forEach((item) => {
+        const st = item.station || 'CURRY';
+        tickets[st] = {
+          ...(tickets[st] || { start: order.cookStart || now }),
+          status: 'READY',
+          readyAt: now,
+        };
+      });
+
+      const updatedOrders = prev.orders.map((o) =>
+        o.id === id ? { ...o, status: 'READY', tickets } : o
+      );
+
+      const nextState = { ...prev, orders: updatedOrders, rev: (prev.rev || 0) + 1 };
+      try {
+        localStorage.setItem('zaika_state_v1', JSON.stringify(nextState));
+        if (bcRef.current) bcRef.current.postMessage({ s: nextState });
+      } catch (e) {}
+      return nextState;
+    });
+
+    beep('ready');
+    addToast({
+      t: 'ready',
+      aud: ['guest', 'staff'],
+      msg: {
+        guest: 'Your food is ready! Staff is bringing it over 🍽️',
+        staff: `Order #${id} is READY FOR PICKUP at Kitchen Counter 🎉`,
+      },
+    });
+
+    // 2. Call backend API
+    const res = await callAPI(`/orders/${id}/ready`, 'PATCH');
     if (res && res.state) {
       setState(res.state);
     }
@@ -1032,6 +1292,7 @@ export function RestaurantProvider({ children }) {
         placeOrder,
         sendToKitchen,
         markStationReady,
+        dispatchOrderReady,
         markServed,
         callWaiter,
         resolveWaiter,

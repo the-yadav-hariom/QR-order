@@ -93,7 +93,12 @@ server.listen(PORT, async () => {
   console.log(`\n===============================================================`);
   console.log(`🚀 Zaika Restaurant Live System Backend is Online`);
   console.log(`---------------------------------------------------------------`);
-  console.log(`🌐 Full Website:     http://localhost:${PORT}`);
+  console.log(`🌐 All-in-One Host:  http://localhost:${PORT}`);
+  console.log(`📱 Guest QR Link:    http://localhost:${PORT}/table/5  (or /guest)`);
+  console.log(`🧑‍💼 Staff Link:       http://localhost:${PORT}/staff`);
+  console.log(`👨‍🍳 Kitchen Link:     http://localhost:${PORT}/kitchen`);
+  console.log(`▦  Split Screen:     http://localhost:${PORT}/split`);
+  console.log(`---------------------------------------------------------------`);
   console.log(`📊 REST API State:   http://localhost:${PORT}/api/state`);
   console.log(`❤️  Health Check:    http://localhost:${PORT}/api/health`);
   console.log(`⚡ Real-time SSE:   http://localhost:${PORT}/api/events`);
@@ -102,4 +107,34 @@ server.listen(PORT, async () => {
 
   // Optional: Connect to MongoDB if MONGODB_URI is provided in .env
   await connectMongoDB();
+
+  // Auxiliary Dedicated Host Listeners
+  const auxHosts = [
+    { port: 5001, path: '/staff', role: 'Staff Dashboard' },
+    { port: 5002, path: '/kitchen', role: 'Kitchen Display (KDS)' },
+    { port: 5003, path: '/guest', role: 'Guest Dine-In Menu' },
+  ];
+
+  auxHosts.forEach(({ port: auxPort, path: defaultPath, role }) => {
+    try {
+      const auxServer = http.createServer((req, res) => {
+        const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+        if (parsedUrl.pathname === '/') {
+          res.writeHead(302, { Location: defaultPath });
+          return res.end();
+        }
+        server.emit('request', req, res);
+      });
+
+      auxServer.on('error', (err) => {
+        if (err.code !== 'EADDRINUSE') {
+          console.warn(`[Aux Host ${auxPort}] Notice: ${err.message}`);
+        }
+      });
+
+      auxServer.listen(auxPort, () => {
+        console.log(`📡 Dedicated ${role} Host: http://localhost:${auxPort}`);
+      });
+    } catch (e) {}
+  });
 });

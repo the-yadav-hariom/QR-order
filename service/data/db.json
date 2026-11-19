@@ -12,7 +12,10 @@
       "cat": "Mains",
       "emoji": "🍛",
       "bg": "#FFE9D6",
-      "desc": "Cottage cheese in a buttery tomato-cashew gravy",
+      "desc": "Fresh Malwa paneer, slow-cooked creamy makhani gravy with aromatic spices.",
+      "img": "https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
+      "spiceLevel": 2,
       "al": [
         "Dairy",
         "Nuts"
@@ -23,14 +26,17 @@
     },
     {
       "id": "dal",
-      "name": "Dal Makhani",
+      "name": "Dal Makhani (Zaika Special)",
       "price": 280,
       "station": "CURRY",
       "prep": 12,
       "cat": "Mains",
       "emoji": "🥘",
       "bg": "#F6E3C8",
-      "desc": "Slow-cooked black lentils finished with cream",
+      "desc": "Simmered overnight for 16 hours with cream, butter, and mild Kashmiri spices.",
+      "img": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
+      "spiceLevel": 1,
       "al": [
         "Dairy"
       ],
@@ -40,14 +46,17 @@
     },
     {
       "id": "biryani",
-      "name": "Veg Biryani",
+      "name": "Veg Dum Biryani",
       "price": 300,
       "station": "CURRY",
       "prep": 18,
       "cat": "Mains",
       "emoji": "🍚",
       "bg": "#FFF0C2",
-      "desc": "Fragrant dum-cooked basmati with garden vegetables",
+      "desc": "Basmati cooked on sealed dum with garden vegetables, saffron & mint.",
+      "img": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
+      "spiceLevel": 2,
       "al": [
         "Dairy"
       ],
@@ -64,7 +73,9 @@
       "cat": "Breads",
       "emoji": "🫓",
       "bg": "#F8E8C9",
-      "desc": "Tandoor-baked bread brushed with garlic butter",
+      "desc": "Tandoor-baked leavened bread brushed with fresh garlic butter.",
+      "img": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
       "al": [
         "Gluten",
         "Dairy"
@@ -80,7 +91,10 @@
       "cat": "Starters",
       "emoji": "🍢",
       "bg": "#FFD9C7",
-      "desc": "Char-grilled marinated paneer, peppers and onion",
+      "desc": "Char-grilled cottage cheese cubes with tandoori spices and mint dip.",
+      "img": "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
+      "spiceLevel": 2,
       "al": [
         "Dairy"
       ],
@@ -97,7 +111,9 @@
       "cat": "Drinks",
       "emoji": "🥭",
       "bg": "#FFEFB8",
-      "desc": "Chilled yogurt shake with Alphonso mango",
+      "desc": "Traditional chilled yogurt smoothie blended with sweet Alphonso mango.",
+      "img": "https://images.unsplash.com/photo-1546173159-315724a31696?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
       "al": [
         "Dairy"
       ],
@@ -112,7 +128,9 @@
       "cat": "Drinks",
       "emoji": "🍵",
       "bg": "#EFE0CF",
-      "desc": "Hot milk tea with ginger and cardamom",
+      "desc": "Brewed black tea with ginger, green cardamom and whole spices.",
+      "img": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
       "al": [
         "Dairy"
       ],
@@ -127,7 +145,9 @@
       "cat": "Desserts",
       "emoji": "🍮",
       "bg": "#F6DCD0",
-      "desc": "Warm milk dumplings in rose-cardamom syrup",
+      "desc": "Golden fried milk solids soaked in warm rose-scented cardamom syrup.",
+      "img": "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=400&q=80",
+      "veg": true,
       "al": [
         "Dairy",
         "Gluten"

@@ -48,12 +48,17 @@ export default function StaffView() {
     setStaffTab,
     resolveWaiter,
     playBellRingtone,
+    sendToKitchen,
+    markServed,
+    setSelectedOrderId,
   } = useRestaurant();
 
   const activeOrders = (state.orders || []).filter(
     (o) => !o.cleared && o.status !== 'PAID'
   );
-  const newOrdersCount = activeOrders.filter((o) => o.status === 'PENDING_APPROVAL').length;
+  const pendingOrders = activeOrders.filter((o) => o.status === 'PENDING_APPROVAL');
+  const readyOrders = activeOrders.filter((o) => o.status === 'READY');
+  const newOrdersCount = pendingOrders.length;
   const helpRequests = Object.entries(state.tables || {}).filter(([_, t]) => t.help);
 
   return (
@@ -111,7 +116,7 @@ export default function StaffView() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => playBellRingtone(tableKey, helpType)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1F1F1F] hover:bg-[#2B2B2B] text-[#F2EEE8] border border-[#3A3A3A] hover:border-[#EF4444] transition shadow-sm"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1F1F1F] hover:bg-[#2B2B2B] text-[#F2EEE8] border border-[#3A3A3A] hover:border-[#EF4444] transition shadow-sm cursor-pointer"
                     title="Ring loud desk bell again"
                   >
                     <span>🔊</span>
@@ -120,12 +125,97 @@ export default function StaffView() {
 
                   <button
                     onClick={() => resolveWaiter(tableKey)}
-                    className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-xl text-xs font-extrabold bg-[#22C55E] text-[#052e16] hover:bg-[#16a34a] shadow-md transition transform active:scale-95"
+                    className="flex items-center gap-1.5 py-1.5 px-3.5 rounded-xl text-xs font-extrabold bg-[#22C55E] text-[#052e16] hover:bg-[#16a34a] shadow-md transition transform active:scale-95 cursor-pointer"
                   >
                     <span>✓</span>
                     <span>Mark Resolved</span>
                   </button>
                 </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Floating Pending Orders Confirmation Banners */}
+      {pendingOrders.length > 0 && (
+        <div className="flex-none px-4 pt-3 flex flex-col gap-2.5">
+          {pendingOrders.map((order) => {
+            const tableNum = order.table.replace('T', '');
+            const itemsText = order.items.map((i) => `${i.qty}× ${i.name}`).join(', ');
+
+            return (
+              <div
+                key={order.id}
+                className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#B83A14]/30 via-[#EA580C]/25 to-[#F59E0B]/20 border-2 border-[#EA580C] rounded-2xl px-4 py-3 anim-flash shadow-xl"
+              >
+                {/* Left: Table and Items details */}
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex items-center gap-1.5 bg-[#EA580C] text-white px-3 py-1.5 rounded-xl font-extrabold text-sm tracking-wide shadow-md animate-pulse flex-none">
+                    <span>📋</span>
+                    <span>TABLE {tableNum}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <b className="text-sm font-extrabold text-white block truncate">
+                      New Order #{order.id} · {order.items.reduce((s, i) => s + i.qty, 0)} items (₹{order.total})
+                    </b>
+                    <p className="text-xs text-[#F2EEE8]/85 truncate mt-0.5">{itemsText}</p>
+                  </div>
+                </div>
+
+                {/* Right: Confirm & Send to Kitchen Button */}
+                <div className="flex items-center gap-2 flex-none">
+                  <button
+                    onClick={() => {
+                      setStaffTab('orders');
+                      setSelectedOrderId(order.id);
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1F1F1F] hover:bg-[#2B2B2B] text-[#F2EEE8] border border-[#3A3A3A] transition cursor-pointer"
+                  >
+                    👁️ Review
+                  </button>
+                  <button
+                    onClick={() => sendToKitchen(order.id)}
+                    className="flex items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-black bg-[#EA580C] hover:bg-[#C2410C] text-white shadow-lg transition transform active:scale-95 cursor-pointer"
+                  >
+                    <span>🔥</span>
+                    <span>Confirm &amp; Send to Kitchen →</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Floating Food Ready for Pickup Banners */}
+      {readyOrders.length > 0 && (
+        <div className="flex-none px-4 pt-3 flex flex-col gap-2.5">
+          {readyOrders.map((order) => {
+            const tableNum = order.table.replace('T', '');
+
+            return (
+              <div
+                key={order.id}
+                className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-[#22C55E]/30 via-[#16A34A]/25 to-[#15803D]/20 border-2 border-[#22C55E] rounded-2xl px-4 py-3 shadow-xl"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 bg-[#22C55E] text-[#052e16] px-3 py-1.5 rounded-xl font-black text-sm tracking-wide shadow-md">
+                    <span>🎉</span>
+                    <span>TABLE {tableNum} READY</span>
+                  </div>
+                  <span className="text-xs font-bold text-white">
+                    Order #{order.id} is cooked and ready for pickup at kitchen counter!
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => markServed(order.id)}
+                  className="flex items-center gap-1.5 py-2 px-4 rounded-xl text-xs font-black bg-[#22C55E] hover:bg-[#16A34A] text-[#052e16] shadow-md transition transform active:scale-95 cursor-pointer"
+                >
+                  <span>🍽️</span>
+                  <span>Mark Served ✓</span>
+                </button>
               </div>
             );
           })}

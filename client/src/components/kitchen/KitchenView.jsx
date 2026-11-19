@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRestaurant, STATIONS, mmss } from '../../context/RestaurantContext';
 
 export default function KitchenView() {
-  const { view, state, markStationReady } = useRestaurant();
+  const { view, state, markStationReady, dispatchOrderReady } = useRestaurant();
   const [now, setNow] = useState(new Date());
   const isSplit = view === 'split';
 
@@ -140,12 +140,23 @@ export default function KitchenView() {
                           <span>✓</span> Station Complete
                         </div>
                       ) : (
-                        <button
-                          onClick={() => markStationReady(o.id, station)}
-                          className="w-full py-3 rounded-xl text-xs font-black text-[#04210f] bg-[#22C55E] hover:bg-[#16a34a] active:scale-95 shadow-lg transition flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <span>✓</span> Mark Ready
-                        </button>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => markStationReady(o.id, station)}
+                            className="w-full py-2.5 rounded-xl text-xs font-black text-[#04210f] bg-[#22C55E] hover:bg-[#16a34a] active:scale-95 shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <span>✓</span> Mark {station} Ready
+                          </button>
+                          {o.items.length > 1 && (
+                            <button
+                              onClick={() => dispatchOrderReady(o.id)}
+                              className="w-full py-1.5 rounded-xl text-[11px] font-bold text-[#F2EEE8] bg-[#242424] hover:bg-[#333] active:scale-95 transition border border-[#3A3A3A] flex items-center justify-center gap-1 cursor-pointer"
+                              title="Mark all items for this table ready to serve"
+                            >
+                              <span>🚀</span> Dispatch Full Order
+                            </button>
+                          )}
+                        </div>
                       )}
                     </div>
                   );

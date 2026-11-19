@@ -142,6 +142,44 @@ export const ordersController = {
     sendJSON(res, { success: true, allReady, state: updatedState });
   },
 
+  // PATCH /api/orders/:id/ready (Kitchen marks entire order ready to dispatch)
+  dispatchAllReady(req, res, orderId) {
+    const state = db.getState();
+    const order = state.orders.find((o) => o.id === orderId);
+
+    if (!order) {
+      return sendJSON(res, { error: 'Order not found' }, 404);
+    }
+
+    db.commit(
+      (s) => {
+        const o = s.orders.find((a) => a.id === orderId);
+        o.status = 'READY';
+        o.tickets = o.tickets || {};
+        o.items.forEach((item) => {
+          const st = item.station || 'CURRY';
+          o.tickets[st] = {
+            ...(o.tickets[st] || { start: o.cookStart || Date.now() }),
+            status: 'READY',
+            readyAt: Date.now(),
+          };
+        });
+      },
+      {
+        t: 'ready',
+        aud: ['guest', 'staff'],
+        table: order.table,
+        c: 'g',
+        msg: {
+          guest: 'Your food is ready! Staff is bringing it over 🍽️',
+          staff: `Table ${tnum(order.table)} order #${orderId} is READY FOR PICKUP 🎉`,
+        },
+      }
+    );
+
+    sendJSON(res, { success: true, allReady: true, state: db.getState() });
+  },
+
   // PATCH /api/orders/:id/serve (Staff marks served)
   markServed(req, res, orderId) {
     const state = db.getState();

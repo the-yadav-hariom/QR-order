@@ -34,6 +34,10 @@ export async function handleApiRoute(pathname, method, req, res) {
   if (stationMatch && method === 'PATCH') {
     return ordersController.markStationReady(req, res, Number(stationMatch[1]));
   }
+  const readyAllMatch = pathname.match(/^\/api\/orders\/(\d+)\/ready$/);
+  if (readyAllMatch && method === 'PATCH') {
+    return ordersController.dispatchAllReady(req, res, Number(readyAllMatch[1]));
+  }
   const serveMatch = pathname.match(/^\/api\/orders\/(\d+)\/serve$/);
   if (serveMatch && method === 'PATCH') {
     return ordersController.markServed(req, res, Number(serveMatch[1]));
